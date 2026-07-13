@@ -158,7 +158,9 @@ class PodViewModel: ObservableObject {
         } else if case .shuffleToggle = selected.type {
             isShuffleEnabled.toggle()
         } else if case .playlist(let playlist) = selected.type {
-            selectedPlaylist = playlist
+            if selectedPlaylist?.id != playlist.id {
+                selectedPlaylist = playlist
+            }
             isCoverFlowPresented = true
             scrollIndex = 0
         } else if case .brokenFolder(let folder) = selected.type {
