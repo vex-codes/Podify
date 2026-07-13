@@ -162,7 +162,13 @@ class PodViewModel: ObservableObject {
                 selectedPlaylist = playlist
             }
             isCoverFlowPresented = true
-            scrollIndex = 0
+            
+            if let currentTrack = AudioEngine.shared.currentTrack,
+               let index = playbackQueue.firstIndex(where: { $0.id == currentTrack.id }) {
+                scrollIndex = index
+            } else {
+                scrollIndex = 0
+            }
         } else if case .brokenFolder(let folder) = selected.type {
             relinkingFolderId = folder.id
             isShowingDocumentPicker = true
