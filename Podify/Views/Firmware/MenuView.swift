@@ -8,7 +8,7 @@ struct MenuView: View {
         VStack(spacing: 0) {
             // Header Bar
             HStack {
-                Text(viewModel.navigationPath.last ?? "iPod")
+                Text(viewModel.navigationPath.last ?? "Podify")
                     .font(.custom(themeManager.currentTheme.fontName, size: 14))
                     .bold()
                 Spacer()

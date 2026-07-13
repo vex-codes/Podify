@@ -23,7 +23,7 @@ class PodViewModel: ObservableObject {
         }
     }
     
-    @Published var navigationPath: [String] = ["iPod"]
+    @Published var navigationPath: [String] = ["Podify"]
     @Published var currentMenu: [MenuItem] = []
     
     @Published var isShowingDocumentPicker = false
