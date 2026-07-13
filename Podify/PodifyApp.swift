@@ -11,7 +11,7 @@ import SwiftUI
 struct PodifyApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            IPodChassisView()
         }
     }
 }
