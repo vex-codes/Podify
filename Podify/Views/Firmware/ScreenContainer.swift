@@ -9,14 +9,21 @@ struct ScreenContainer: View {
             .fill(themeManager.currentTheme.backgroundColor)
             .aspectRatio(4/3, contentMode: .fit)
             .overlay(
-                Group {
-                    if viewModel.isNowPlayingPresented {
-                        NowPlayingView()
-                    } else if viewModel.isSettingsPresented {
-                        SettingsView(viewModel: viewModel)
-                    } else {
-                        MenuView(viewModel: viewModel)
+                VStack(spacing: 0) {
+                    StatusBarView()
+                    
+                    Group {
+                        if viewModel.isNowPlayingPresented {
+                            NowPlayingView()
+                        } else if viewModel.isCoverFlowPresented, let playlist = viewModel.selectedPlaylist {
+                            CoverFlowView(playlist: playlist, scrollIndex: viewModel.scrollIndex)
+                        } else if viewModel.isSettingsPresented {
+                            SettingsView(viewModel: viewModel)
+                        } else {
+                            MenuView(viewModel: viewModel)
+                        }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
                 .padding(4) // Bezel padding
             )

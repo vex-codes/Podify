@@ -4,11 +4,21 @@ import Combine
 class PodViewModel: ObservableObject {
     @Published var scrollIndex: Int = 0 {
         didSet {
-            let maxCount = isSettingsPresented ? 4 : currentMenu.count
+            let maxCount: Int
+            if isCoverFlowPresented, let playlist = selectedPlaylist {
+                maxCount = playlist.tracks.count
+            } else if isSettingsPresented {
+                maxCount = 4
+            } else {
+                maxCount = currentMenu.count
+            }
+            
             if scrollIndex < 0 {
                 scrollIndex = 0
+            } else if maxCount == 0 {
+                scrollIndex = 0
             } else if scrollIndex >= maxCount {
-                scrollIndex = max(0, maxCount - 1)
+                scrollIndex = maxCount - 1
             }
         }
     }
@@ -20,6 +30,13 @@ class PodViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var isNowPlayingPresented = false
     @Published var isSettingsPresented = false
+    @Published var isCoverFlowPresented = false
+    @Published var selectedPlaylist: Playlist?
+    @Published var isShuffleEnabled = false {
+        didSet {
+            rebuildMainMenu()
+        }
+    }
     
     var currentFolderURL: URL?
     var allTracks: [Track] = []
@@ -29,21 +46,41 @@ class PodViewModel: ObservableObject {
     }
     
     func loadMockData() {
+        rebuildMainMenu()
+    }
+    
+    private func rebuildMainMenu() {
         let syncItem = MenuItem(title: "Sync Folder...", type: .folder)
         let npItem = MenuItem(title: "Now Playing", type: .folder)
         let settingsItem = MenuItem(title: "Settings", type: .folder)
+        let shuffleState = isShuffleEnabled ? "On" : "Off"
+        let shuffleItem = MenuItem(title: "Shuffle: " + shuffleState, type: .shuffleToggle)
         
-        let tracks = [
-            Track(title: "Body So Tea", artist: "Coco Jones", album: "R&B Now", fileURL: nil),
-            Track(title: "Get Lucky", artist: "Daft Punk", album: "Random Access Memories", fileURL: nil)
-        ]
+        var newMenu = [syncItem, npItem, settingsItem, shuffleItem]
         
-        allTracks = tracks
-        currentMenu = [syncItem, npItem, settingsItem] + tracks.map { MenuItem(title: $0.title, type: .track($0)) }
+        for item in currentMenu {
+            if case .playlist = item.type {
+                newMenu.append(item)
+            } else if case .track = item.type {
+                newMenu.append(item)
+            }
+        }
+        
+        currentMenu = newMenu
     }
     
     func selectCurrentItem() {
         if isSettingsPresented {
+            return
+        }
+        
+        if isCoverFlowPresented {
+            if let playlist = selectedPlaylist, scrollIndex >= 0 && scrollIndex < playlist.tracks.count {
+                let currentTrack = playlist.tracks[scrollIndex]
+                let playQueue = isShuffleEnabled ? playlist.tracks.shuffled() : playlist.tracks
+                AudioEngine.shared.play(track: currentTrack, in: playQueue)
+                isNowPlayingPresented = true
+            }
             return
         }
         
@@ -59,6 +96,12 @@ class PodViewModel: ObservableObject {
         } else if selected.title == "Settings" {
             isSettingsPresented = true
             scrollIndex = 0
+        } else if case .shuffleToggle = selected.type {
+            isShuffleEnabled.toggle()
+        } else if case .playlist(let playlist) = selected.type {
+            selectedPlaylist = playlist
+            isCoverFlowPresented = true
+            scrollIndex = 0
         } else if case .track(let track) = selected.type {
             AudioEngine.shared.play(track: track, in: allTracks)
             isNowPlayingPresented = true
@@ -68,6 +111,9 @@ class PodViewModel: ObservableObject {
     func navigateBack() {
         if isNowPlayingPresented {
             isNowPlayingPresented = false
+        } else if isCoverFlowPresented {
+            isCoverFlowPresented = false
+            scrollIndex = 0
         } else if isSettingsPresented {
             isSettingsPresented = false
             scrollIndex = 0
@@ -81,17 +127,21 @@ class PodViewModel: ObservableObject {
         currentFolderURL = url
         isLoading = true
         
-        FileScanner.shared.scanFolder(at: url) { [weak self] tracks in
-            guard let self = self else { return }
+        FileScanner.shared.scanFolder(at: url) { [weak self] playlist in
+            guard let self = self, let playlist = playlist else { return }
             self.isLoading = false
             let syncItem = MenuItem(title: "Sync Folder...", type: .folder)
             let npItem = MenuItem(title: "Now Playing", type: .folder)
             let settingsItem = MenuItem(title: "Settings", type: .folder)
-            let trackItems = tracks.map { MenuItem(title: $0.title, type: .track($0)) }
-            self.allTracks = tracks
-            self.currentMenu = [syncItem, npItem, settingsItem] + trackItems
+            let shuffleState = self.isShuffleEnabled ? "On" : "Off"
+            let shuffleItem = MenuItem(title: "Shuffle: " + shuffleState, type: .shuffleToggle)
+            
+            let playlistItem = MenuItem(title: playlist.title, type: .playlist(playlist))
+            
+            self.allTracks = playlist.tracks
+            self.currentMenu = [syncItem, npItem, settingsItem, shuffleItem, playlistItem]
             self.scrollIndex = 0
-            print("Found \\(tracks.count) MP3s")
+            print("Found \\(playlist.tracks.count) MP3s")
         }
     }
 }
@@ -104,9 +154,11 @@ struct Theme: Identifiable, Equatable {
     let backgroundColor: Color
     let accentColor: Color
     let textColor: Color
+    let secondaryTextColor: Color
     let bezelColor: Color
     let wheelColor: Color
     let centerButtonColor: Color
+    let fontName: String
 }
 
 struct ThemeFactory {
@@ -117,9 +169,11 @@ struct ThemeFactory {
         backgroundColor: Color(red: 196/255, green: 212/255, blue: 205/255),
         accentColor: .black,
         textColor: .black,
+        secondaryTextColor: Color.black.opacity(0.6),
         bezelColor: .black,
         wheelColor: Color(white: 0.9),
-        centerButtonColor: Color(white: 0.8)
+        centerButtonColor: Color(white: 0.8),
+        fontName: "Menlo"
     )
     
     static let atomicGreen = Theme(
@@ -129,9 +183,11 @@ struct ThemeFactory {
         backgroundColor: .black,
         accentColor: Color(red: 57/255, green: 255/255, blue: 20/255),
         textColor: Color(red: 57/255, green: 255/255, blue: 20/255),
+        secondaryTextColor: Color(red: 57/255, green: 255/255, blue: 20/255).opacity(0.6),
         bezelColor: Color(red: 57/255, green: 255/255, blue: 20/255),
         wheelColor: Color(white: 0.2),
-        centerButtonColor: Color(white: 0.15)
+        centerButtonColor: Color(white: 0.15),
+        fontName: "CourierNewPS-BoldMT"
     )
     
     static let sunsetOrange = Theme(
@@ -141,9 +197,11 @@ struct ThemeFactory {
         backgroundColor: Color(red: 255/255, green: 240/255, blue: 200/255),
         accentColor: Color(red: 255/255, green: 100/255, blue: 50/255),
         textColor: Color(red: 100/255, green: 40/255, blue: 20/255),
+        secondaryTextColor: Color(red: 100/255, green: 40/255, blue: 20/255).opacity(0.6),
         bezelColor: Color(red: 255/255, green: 150/255, blue: 50/255),
         wheelColor: Color(red: 255/255, green: 245/255, blue: 235/255),
-        centerButtonColor: Color(red: 240/255, green: 230/255, blue: 220/255)
+        centerButtonColor: Color(red: 240/255, green: 230/255, blue: 220/255),
+        fontName: "Menlo"
     )
     
     static let presets = [classicMono, atomicGreen, sunsetOrange]
@@ -284,9 +342,11 @@ class ThemeManager: ObservableObject {
                 backgroundColor: customBackgroundColor,
                 accentColor: customAccentColor,
                 textColor: customTextColor,
+                secondaryTextColor: customTextColor.opacity(0.6),
                 bezelColor: customBezelColor,
                 wheelColor: customWheelColor,
-                centerButtonColor: customCenterButtonColor
+                centerButtonColor: customCenterButtonColor,
+                fontName: "Menlo"
             )
         }
     }
@@ -304,7 +364,7 @@ struct SettingsView: View {
         VStack(spacing: 0) {
             HStack {
                 Text("Settings")
-                    .font(.custom("Monaco", size: 14))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 14))
                     .bold()
                 Spacer()
             }
@@ -320,7 +380,7 @@ struct SettingsView: View {
                     ForEach(0..<themeOptions.count, id: \.self) { index in
                         HStack {
                             Text(themeNames[index])
-                                .font(.custom("Monaco", size: 14))
+                                .font(.custom(themeManager.currentTheme.fontName, size: 14))
                             Spacer()
                             if themeManager.activeThemeId == themeOptions[index] {
                                 Image(systemName: "checkmark")
@@ -342,7 +402,7 @@ struct SettingsView: View {
                             ColorPicker("Wheel", selection: $themeManager.customWheelColor)
                             ColorPicker("Center Btn", selection: $themeManager.customCenterButtonColor)
                         }
-                        .font(.custom("Monaco", size: 12))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 12))
                         .foregroundColor(themeManager.currentTheme.textColor)
                         .padding(.horizontal, 8)
                         .padding(.top, 8)
@@ -352,5 +412,157 @@ struct SettingsView: View {
             }
         }
         .background(themeManager.currentTheme.backgroundColor)
+    }
+}
+
+class StatusBarManager: ObservableObject {
+    @Published var currentTimeString = ""
+    @Published var batteryLevel: Float = 1.0
+    
+    private var timer: Timer?
+    
+    init() {
+        UIDevice.current.isBatteryMonitoringEnabled = true
+        updateTime()
+        updateBattery()
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+            self?.updateTime()
+            self?.updateBattery()
+        }
+    }
+    
+    private func updateTime() {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        currentTimeString = formatter.string(from: Date())
+    }
+    
+    private func updateBattery() {
+        batteryLevel = UIDevice.current.batteryLevel
+    }
+    
+    var batteryIcon: String {
+        if batteryLevel < 0 { return "battery.100" } // Simulator usually returns -1
+        if batteryLevel > 0.8 { return "battery.100" }
+        if batteryLevel > 0.5 { return "battery.75" }
+        if batteryLevel > 0.25 { return "battery.50" }
+        return "battery.25"
+    }
+}
+
+// MARK: - StatusBarView
+struct StatusBarView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+    @StateObject private var manager = StatusBarManager()
+    
+    var body: some View {
+        HStack {
+            Text(manager.currentTimeString)
+                .font(.custom(themeManager.currentTheme.fontName, size: 10))
+            
+            Spacer()
+            
+            Image(systemName: manager.batteryIcon)
+                .font(.system(size: 10))
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 2)
+        .foregroundColor(themeManager.currentTheme.textColor)
+        .background(themeManager.currentTheme.backgroundColor)
+    }
+}
+
+struct CoverFlowItemView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+    let track: Track
+    let itemWidth: CGFloat
+    let isSelected: Bool
+    
+    @State private var artwork: UIImage? = nil
+    
+    var body: some View {
+        Group {
+            if let image = artwork {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                Rectangle()
+                    .fill(themeManager.currentTheme.accentColor.opacity(0.3))
+                    .overlay(
+                        Image(systemName: "music.note")
+                            .foregroundColor(themeManager.currentTheme.accentColor)
+                            .font(.largeTitle)
+                    )
+            }
+        }
+        .frame(width: itemWidth, height: itemWidth)
+        .border(themeManager.currentTheme.textColor, width: isSelected ? 3 : 1)
+        .task(id: track.id) {
+            if let cached = ImageCache.shared.get(for: track.id.uuidString) {
+                artwork = cached
+            } else {
+                artwork = await ImageCache.shared.loadAsync(for: track)
+            }
+        }
+    }
+}
+
+// MARK: - CoverFlowView
+struct CoverFlowView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+    let playlist: Playlist
+    let scrollIndex: Int
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            GeometryReader { geometry in
+                let itemWidth = geometry.size.width * 0.5
+                let spacing: CGFloat = -20
+                let totalItemWidth = itemWidth + spacing
+                
+                let offset = (geometry.size.width - itemWidth) / 2 - CGFloat(scrollIndex) * totalItemWidth
+                
+                HStack(spacing: spacing) {
+                    ForEach(0..<playlist.tracks.count, id: \.self) { index in
+                        let track = playlist.tracks[index]
+                        
+                        CoverFlowItemView(
+                            track: track,
+                            itemWidth: itemWidth,
+                            isSelected: index == scrollIndex
+                        )
+                        .rotation3DEffect(
+                            .degrees(index == scrollIndex ? 0 : (index < scrollIndex ? 45 : -45)),
+                            axis: (x: 0, y: 1, z: 0)
+                        )
+                        .scaleEffect(index == scrollIndex ? 1.1 : 0.8)
+                        .opacity(index == scrollIndex ? 1.0 : 0.6)
+                        .zIndex(index == scrollIndex ? 1 : 0)
+                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: scrollIndex)
+                    }
+                }
+                .offset(x: offset)
+                .frame(maxHeight: .infinity)
+            }
+            
+            VStack(spacing: 4) {
+                if playlist.tracks.indices.contains(scrollIndex) {
+                    let currentTrack = playlist.tracks[scrollIndex]
+                    Text(currentTrack.title)
+                        .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                        .bold()
+                        .lineLimit(1)
+                    Text(currentTrack.artist)
+                        .font(.custom(themeManager.currentTheme.fontName, size: 12))
+                        .lineLimit(1)
+                }
+            }
+            .foregroundColor(themeManager.currentTheme.textColor)
+            .padding(.bottom, 16)
+        }
+        .background(themeManager.currentTheme.backgroundColor)
+        .clipped()
     }
 }

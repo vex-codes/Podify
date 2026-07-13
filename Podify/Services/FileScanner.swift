@@ -2,15 +2,74 @@ import Foundation
 import AVFoundation
 import UIKit
 
+class ImageCache {
+    static let shared = ImageCache()
+    private let ramCache = NSCache<NSString, UIImage>()
+    private let fileManager = FileManager.default
+    
+    private var cacheDirectory: URL {
+        fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("ArtworkCache")
+    }
+    
+    private init() {
+        try? fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+    }
+    
+    func set(_ image: UIImage, for key: String) {
+        ramCache.setObject(image, forKey: NSString(string: key))
+        
+        let fileURL = cacheDirectory.appendingPathComponent("\\(key).jpg")
+        if !fileManager.fileExists(atPath: fileURL.path) {
+            if let data = image.jpegData(compressionQuality: 0.8) {
+                try? data.write(to: fileURL)
+            }
+        }
+    }
+    
+    func get(for key: String) -> UIImage? {
+        if let image = ramCache.object(forKey: NSString(string: key)) {
+            return image
+        }
+        
+        let fileURL = cacheDirectory.appendingPathComponent("\\(key).jpg")
+        if let data = try? Data(contentsOf: fileURL), let image = UIImage(data: data) {
+            ramCache.setObject(image, forKey: NSString(string: key))
+            return image
+        }
+        
+        return nil
+    }
+    
+    func loadAsync(for track: Track) async -> UIImage? {
+        if let image = get(for: track.id.uuidString) {
+            return image
+        }
+        
+        guard let url = track.fileURL else { return nil }
+        
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                let asset = AVAsset(url: url)
+                if let image = FileScanner.shared.extractArtwork(for: asset) {
+                    self.set(image, for: track.id.uuidString)
+                    continuation.resume(returning: image)
+                } else {
+                    continuation.resume(returning: nil)
+                }
+            }
+        }
+    }
+}
+
 class FileScanner {
     static let shared = FileScanner()
     
     private init() {}
     
-    func scanFolder(at url: URL, completion: @escaping ([Track]) -> Void) {
+    func scanFolder(at url: URL, completion: @escaping (Playlist?) -> Void) {
         guard url.startAccessingSecurityScopedResource() else {
             print("Failed to access security scoped resource.")
-            completion([])
+            completion(nil)
             return
         }
         
@@ -20,7 +79,7 @@ class FileScanner {
             
             guard let enumerator = fileManager.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey]) else {
                 url.stopAccessingSecurityScopedResource()
-                DispatchQueue.main.async { completion([]) }
+                DispatchQueue.main.async { completion(nil) }
                 return
             }
             
@@ -50,13 +109,20 @@ class FileScanner {
                     
                     let track = Track(title: title, artist: artist, album: album, fileURL: fileURL)
                     tracks.append(track)
+                    
+                    // Extract and cache artwork immediately
+                    if let image = self.extractArtwork(for: asset) {
+                        ImageCache.shared.set(image, for: track.id.uuidString)
+                    }
                 }
             }
             
             tracks.sort { $0.title < $1.title }
+            let playlistName = url.lastPathComponent
+            let playlist = Playlist(title: playlistName, tracks: tracks, folderURL: url)
             
             DispatchQueue.main.async {
-                completion(tracks)
+                completion(playlist)
             }
         }
     }

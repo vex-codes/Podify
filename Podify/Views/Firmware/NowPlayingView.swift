@@ -10,15 +10,16 @@ struct NowPlayingView: View {
             // Header Bar
             HStack {
                 Text("Now Playing")
-                    .font(.custom("Monaco", size: 14))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 14))
                     .bold()
                 Spacer()
                 if audioEngine.isShuffleEnabled {
-                    Image(systemName: "shuffle")
-                        .font(.system(size: 10))
+                    Text("SHUFFLE")
+                        .font(.custom(themeManager.currentTheme.fontName, size: 10))
+                        .foregroundColor(themeManager.currentTheme.secondaryTextColor)
                 }
-                Image(systemName: audioEngine.state == .playing ? "play.fill" : "pause.fill")
-                    .font(.system(size: 10))
+                Text(audioEngine.state == .playing ? "▶︎" : "||")
+                    .font(.custom(themeManager.currentTheme.fontName, size: 12))
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
@@ -38,14 +39,14 @@ struct NowPlayingView: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(audioEngine.currentTrack?.title ?? "Unknown")
-                        .font(.custom("Monaco", size: 14))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 14))
                         .bold()
                         .lineLimit(1)
                     Text(audioEngine.currentTrack?.artist ?? "Unknown")
-                        .font(.custom("Monaco", size: 12))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 12))
                         .lineLimit(1)
                     Text(audioEngine.currentTrack?.album ?? "Unknown")
-                        .font(.custom("Monaco", size: 10))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 10))
                         .lineLimit(1)
                 }
                 .foregroundColor(themeManager.currentTheme.textColor)
@@ -54,6 +55,15 @@ struct NowPlayingView: View {
             .padding(.horizontal, 16)
             
             Spacer()
+            
+            HStack {
+                Text("(^_^)")
+                    .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                    .foregroundColor(themeManager.currentTheme.secondaryTextColor)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, -4)
             
             // Progress Bar
             VStack(spacing: 4) {
@@ -72,10 +82,10 @@ struct NowPlayingView: View {
                 
                 HStack {
                     Text(formatTime(audioEngine.progress))
-                        .font(.custom("Monaco", size: 10))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 10))
                     Spacer()
                     Text("-" + formatTime(audioEngine.duration - audioEngine.progress))
-                        .font(.custom("Monaco", size: 10))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 10))
                 }
                 .foregroundColor(themeManager.currentTheme.textColor)
             }
@@ -105,28 +115,24 @@ struct ArtworkView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } else {
-                Image(systemName: "music.note")
-                    .foregroundColor(themeManager.currentTheme.textColor)
+                Rectangle()
+                    .fill(themeManager.currentTheme.accentColor.opacity(0.3))
+                    .overlay(
+                        Image(systemName: "music.note")
+                            .foregroundColor(themeManager.currentTheme.accentColor)
+                            .font(.largeTitle)
+                    )
             }
         }
-        .onAppear {
-            loadArtwork()
-        }
-        .onChange(of: track?.id) { _, _ in
-            loadArtwork()
-        }
-    }
-    
-    private func loadArtwork() {
-        guard let url = track?.fileURL else {
-            image = nil
-            return
-        }
-        DispatchQueue.global(qos: .userInitiated).async {
-            let asset = AVFoundation.AVAsset(url: url)
-            let art = FileScanner.shared.extractArtwork(for: asset)
-            DispatchQueue.main.async {
-                self.image = art
+        .task(id: track?.id) {
+            guard let track = track else {
+                image = nil
+                return
+            }
+            if let cached = ImageCache.shared.get(for: track.id.uuidString) {
+                image = cached
+            } else {
+                image = await ImageCache.shared.loadAsync(for: track)
             }
         }
     }

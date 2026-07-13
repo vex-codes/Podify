@@ -11,6 +11,10 @@ import SwiftUI
 struct PodifyApp: App {
     @StateObject private var themeManager = ThemeManager()
     
+    init() {
+        UIApplication.shared.isIdleTimerDisabled = true
+    }
+    
     var body: some Scene {
         WindowGroup {
             IPodChassisView()

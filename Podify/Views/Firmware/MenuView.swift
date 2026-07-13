@@ -9,7 +9,7 @@ struct MenuView: View {
             // Header Bar
             HStack {
                 Text(viewModel.navigationPath.last ?? "iPod")
-                    .font(.custom("Monaco", size: 14))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 14))
                     .bold()
                 Spacer()
             }
@@ -27,15 +27,29 @@ struct MenuView: View {
                         ForEach(Array(viewModel.currentMenu.enumerated()), id: \.element.id) { index, item in
                             HStack {
                                 Text(item.title)
-                                    .font(.custom("Monaco", size: 16))
+                                    .font(.custom(themeManager.currentTheme.fontName, size: 16))
                                     .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
                                     .lineLimit(1)
                                 Spacer()
-                                if case .folder = item.type {
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
+                                Group {
+                                    switch item.type {
+                                    case .folder:
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 10, weight: .bold))
+                                    case .playlist:
+                                        Image(systemName: "music.note.list")
+                                            .font(.system(size: 10, weight: .bold))
+                                    case .track:
+                                        Image(systemName: "music.note")
+                                            .font(.system(size: 10, weight: .bold))
+                                    case .shuffleToggle:
+                                        Image(systemName: "shuffle")
+                                            .font(.system(size: 10, weight: .bold))
+                                    case .back:
+                                        EmptyView()
+                                    }
                                 }
+                                .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 6)

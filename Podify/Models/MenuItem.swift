@@ -2,8 +2,9 @@ import Foundation
 
 enum MenuItemType {
     case folder
-    case playlist
+    case playlist(Playlist)
     case track(Track)
+    case shuffleToggle
     case back
 }
 
