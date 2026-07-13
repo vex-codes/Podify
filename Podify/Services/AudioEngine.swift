@@ -17,7 +17,6 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var isShuffleEnabled: Bool = false
     
     private var player: AVAudioPlayer?
-    private var originalQueue: [Track] = []
     private var activeQueue: [Track] = []
     private var currentIndex: Int = 0
     private var timer: Timer?
@@ -38,7 +37,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     func play(track: Track, in queue: [Track]) {
-        originalQueue = queue
+        activeQueue = queue
         activeQueue = queue
         
         if let index = activeQueue.firstIndex(where: { $0.id == track.id }) {
@@ -98,21 +97,10 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
     }
     
-    func toggleShuffle() {
-        isShuffleEnabled.toggle()
-        if isShuffleEnabled {
-            let current = activeQueue[currentIndex]
-            activeQueue = activeQueue.shuffled()
-            if let index = activeQueue.firstIndex(where: { $0.id == current.id }) {
-                activeQueue.swapAt(0, index)
-                currentIndex = 0
-            }
-        } else {
-            let current = activeQueue[currentIndex]
-            activeQueue = originalQueue
-            if let index = activeQueue.firstIndex(where: { $0.id == current.id }) {
-                currentIndex = index
-            }
+    func updateQueue(with queue: [Track]) {
+        activeQueue = queue
+        if let current = currentTrack, let index = activeQueue.firstIndex(where: { $0.id == current.id }) {
+            currentIndex = index
         }
     }
     

@@ -31,16 +31,42 @@ class PodViewModel: ObservableObject {
     @Published var isNowPlayingPresented = false
     @Published var isSettingsPresented = false
     @Published var isCoverFlowPresented = false
-    @Published var selectedPlaylist: Playlist? {
+    @Published var selectedPlaylist: Playlist? = {
+        if let data = UserDefaults.standard.data(forKey: "savedSelectedPlaylist"),
+           let savedPlaylist = try? JSONDecoder().decode(Playlist.self, from: data) {
+            return savedPlaylist
+        }
+        return nil
+    }() {
         didSet {
-            updatePlaybackQueue()
+            if let playlist = selectedPlaylist, let data = try? JSONEncoder().encode(playlist) {
+                UserDefaults.standard.set(data, forKey: "savedSelectedPlaylist")
+            } else {
+                UserDefaults.standard.removeObject(forKey: "savedSelectedPlaylist")
+            }
+            if selectedPlaylist != nil {
+                updatePlaybackQueue()
+            }
         }
     }
     
-    @Published var playbackQueue: [Track] = []
-    
-    @Published var isShuffleEnabled = false {
+    @Published var playbackQueue: [Track] = {
+        if let data = UserDefaults.standard.data(forKey: "savedPlaybackQueue"),
+           let savedQueue = try? JSONDecoder().decode([Track].self, from: data) {
+            return savedQueue
+        }
+        return []
+    }() {
         didSet {
+            if let data = try? JSONEncoder().encode(playbackQueue) {
+                UserDefaults.standard.set(data, forKey: "savedPlaybackQueue")
+            }
+        }
+    }
+    
+    @Published var isShuffleEnabled: Bool = UserDefaults.standard.bool(forKey: "savedShuffleState") {
+        didSet {
+            UserDefaults.standard.set(isShuffleEnabled, forKey: "savedShuffleState")
             AudioEngine.shared.isShuffleEnabled = isShuffleEnabled
             rebuildMainMenu()
             updatePlaybackQueue()
@@ -49,16 +75,18 @@ class PodViewModel: ObservableObject {
     
     private func updatePlaybackQueue() {
         guard let playlist = selectedPlaylist else {
-            playbackQueue = []
             return
         }
         playbackQueue = isShuffleEnabled ? playlist.tracks.shuffled() : playlist.tracks
+        AudioEngine.shared.updateQueue(with: playbackQueue)
     }
     
     var relinkingFolderId: UUID? = nil
     private var cancellables = Set<AnyCancellable>()
     
     init() {
+        AudioEngine.shared.isShuffleEnabled = self.isShuffleEnabled
+        
         LibraryManager.shared.$syncedFolders
             .sink { [weak self] _ in
                 DispatchQueue.main.async {
