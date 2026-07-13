@@ -30,7 +30,18 @@ class PodViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var isNowPlayingPresented = false
     @Published var isSettingsPresented = false
-    @Published var isCoverFlowPresented = false
+    @Published var isCoverFlowPresented = false {
+        didSet {
+            if isCoverFlowPresented {
+                if let currentTrack = AudioEngine.shared.currentTrack,
+                   let index = playbackQueue.firstIndex(where: { $0.id == currentTrack.id }) {
+                    scrollIndex = index
+                } else {
+                    scrollIndex = 0
+                }
+            }
+        }
+    }
     @Published var selectedPlaylist: Playlist? = {
         if let data = UserDefaults.standard.data(forKey: "savedSelectedPlaylist"),
            let savedPlaylist = try? JSONDecoder().decode(Playlist.self, from: data) {
@@ -102,6 +113,28 @@ class PodViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
+            
+        AudioEngine.shared.$currentTrack
+            .sink { [weak self] newTrack in
+                guard let self = self, let newTrack = newTrack else { return }
+                
+                if self.isCoverFlowPresented {
+                    let oldTrack = AudioEngine.shared.currentTrack
+                    
+                    if let oldTrack = oldTrack, 
+                       let oldIndex = self.playbackQueue.firstIndex(where: { $0.id == oldTrack.id }) {
+                        
+                        if self.scrollIndex == oldIndex {
+                            if let newIndex = self.playbackQueue.firstIndex(where: { $0.id == newTrack.id }) {
+                                DispatchQueue.main.async {
+                                    self.scrollIndex = newIndex
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
     }
     
     private func rebuildMainMenu() {
@@ -162,13 +195,6 @@ class PodViewModel: ObservableObject {
                 selectedPlaylist = playlist
             }
             isCoverFlowPresented = true
-            
-            if let currentTrack = AudioEngine.shared.currentTrack,
-               let index = playbackQueue.firstIndex(where: { $0.id == currentTrack.id }) {
-                scrollIndex = index
-            } else {
-                scrollIndex = 0
-            }
         } else if case .brokenFolder(let folder) = selected.type {
             relinkingFolderId = folder.id
             isShowingDocumentPicker = true
