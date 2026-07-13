@@ -3,6 +3,7 @@ import AVFoundation
 
 struct NowPlayingView: View {
     @ObservedObject var audioEngine = AudioEngine.shared
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         VStack(spacing: 12) {
@@ -21,14 +22,15 @@ struct NowPlayingView: View {
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color.black.opacity(0.1))
+            .background(themeManager.currentTheme.accentColor.opacity(0.1))
+            .foregroundColor(themeManager.currentTheme.textColor)
             
-            Divider().background(Color.black)
+            Divider().background(themeManager.currentTheme.textColor)
             
             HStack(spacing: 16) {
                 // Artwork Placeholder
                 Rectangle()
-                    .fill(Color.black.opacity(0.2))
+                    .fill(themeManager.currentTheme.textColor.opacity(0.2))
                     .frame(width: 80, height: 80)
                     .overlay(
                         ArtworkView(track: audioEngine.currentTrack)
@@ -46,6 +48,7 @@ struct NowPlayingView: View {
                         .font(.custom("Monaco", size: 10))
                         .lineLimit(1)
                 }
+                .foregroundColor(themeManager.currentTheme.textColor)
                 Spacer()
             }
             .padding(.horizontal, 16)
@@ -57,11 +60,11 @@ struct NowPlayingView: View {
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         Rectangle()
-                            .fill(Color.black.opacity(0.2))
+                            .fill(themeManager.currentTheme.textColor.opacity(0.2))
                             .frame(height: 10)
                         
                         Rectangle()
-                            .fill(Color.black)
+                            .fill(themeManager.currentTheme.textColor)
                             .frame(width: max(0, geo.size.width * CGFloat(audioEngine.progress / max(1, audioEngine.duration))), height: 10)
                     }
                 }
@@ -74,10 +77,12 @@ struct NowPlayingView: View {
                     Text("-" + formatTime(audioEngine.duration - audioEngine.progress))
                         .font(.custom("Monaco", size: 10))
                 }
+                .foregroundColor(themeManager.currentTheme.textColor)
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
         }
+        .background(themeManager.currentTheme.backgroundColor)
     }
     
     private func formatTime(_ time: Double) -> String {
@@ -91,6 +96,7 @@ struct NowPlayingView: View {
 struct ArtworkView: View {
     let track: Track?
     @State private var image: UIImage?
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         Group {
@@ -100,7 +106,7 @@ struct ArtworkView: View {
                     .aspectRatio(contentMode: .fill)
             } else {
                 Image(systemName: "music.note")
-                    .foregroundColor(.black)
+                    .foregroundColor(themeManager.currentTheme.textColor)
             }
         }
         .onAppear {

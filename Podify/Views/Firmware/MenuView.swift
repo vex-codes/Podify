@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MenuView: View {
     @ObservedObject var viewModel: PodViewModel
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         VStack(spacing: 0) {
@@ -14,9 +15,10 @@ struct MenuView: View {
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color.black.opacity(0.1))
+            .background(themeManager.currentTheme.accentColor.opacity(0.1))
+            .foregroundColor(themeManager.currentTheme.textColor)
             
-            Divider().background(Color.black)
+            Divider().background(themeManager.currentTheme.textColor)
             
             // The Scrollable List
             ScrollViewReader { proxy in
@@ -26,18 +28,18 @@ struct MenuView: View {
                             HStack {
                                 Text(item.title)
                                     .font(.custom("Monaco", size: 16))
-                                    .foregroundColor(viewModel.scrollIndex == index ? .white : .black)
+                                    .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
                                     .lineLimit(1)
                                 Spacer()
                                 if case .folder = item.type {
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(viewModel.scrollIndex == index ? .white : .black)
+                                        .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
                                 }
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 6)
-                            .background(viewModel.scrollIndex == index ? Color.black : Color.clear)
+                            .background(viewModel.scrollIndex == index ? themeManager.currentTheme.accentColor : Color.clear)
                             .id(index)
                         }
                     }
@@ -49,5 +51,6 @@ struct MenuView: View {
                 }
             }
         }
+        .background(themeManager.currentTheme.backgroundColor)
     }
 }

@@ -2,11 +2,12 @@ import SwiftUI
 
 struct IPodChassisView: View {
     @StateObject private var viewModel = PodViewModel()
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         ZStack {
             // Main chassis background
-            Color.black.edgesIgnoringSafeArea(.all)
+            themeManager.currentTheme.chassisColor.edgesIgnoringSafeArea(.all)
             
             VStack(spacing: 40) {
                 // Screen Area
@@ -16,7 +17,16 @@ struct IPodChassisView: View {
                 // Click Wheel
                 ClickWheelView(
                     scrollIndex: $viewModel.scrollIndex,
-                    onCenterTap: { viewModel.selectCurrentItem() },
+                    onCenterTap: {
+                        if viewModel.isSettingsPresented {
+                            let themes = ["classicMono", "atomicGreen", "sunsetOrange", "custom"]
+                            if viewModel.scrollIndex >= 0 && viewModel.scrollIndex < themes.count {
+                                themeManager.applyTheme(id: themes[viewModel.scrollIndex])
+                            }
+                        } else {
+                            viewModel.selectCurrentItem()
+                        }
+                    },
                     onMenuTap: { viewModel.navigateBack() },
                     onPlayPauseTap: { AudioEngine.shared.togglePlayPause() },
                     onNextTap: { AudioEngine.shared.next() },

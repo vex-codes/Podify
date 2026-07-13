@@ -9,11 +9,12 @@ struct ClickWheelView: View {
     var onPrevTap: () -> Void
     
     @State private var lastAngle: Double = 0
+    @EnvironmentObject var themeManager: ThemeManager
     
     var body: some View {
         GeometryReader { geometry in
             Circle()
-                .fill(Color(white: 0.9)) // The wheel
+                .fill(themeManager.currentTheme.wheelColor) // The wheel
                 .overlay(
                     VStack {
                         Text("MENU").font(.system(size: 14, weight: .bold)).foregroundColor(.gray)
@@ -38,7 +39,7 @@ struct ClickWheelView: View {
                 )
                 .overlay(
                     Circle()
-                        .fill(Color(white: 0.8))
+                        .fill(themeManager.currentTheme.centerButtonColor)
                         .frame(width: 80, height: 80) // The center button
                         .onTapGesture {
                             onCenterTap()
