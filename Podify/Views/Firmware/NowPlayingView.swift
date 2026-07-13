@@ -4,6 +4,7 @@ import AVFoundation
 struct NowPlayingView: View {
     @ObservedObject var audioEngine = AudioEngine.shared
     @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some View {
         VStack(spacing: 12) {
@@ -93,6 +94,16 @@ struct NowPlayingView: View {
             .padding(.bottom, 16)
         }
         .background(themeManager.currentTheme.backgroundColor)
+        .onAppear {
+            let current = audioEngine.currentTrack
+            audioEngine.currentTrack = current
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                let current = audioEngine.currentTrack
+                audioEngine.currentTrack = current
+            }
+        }
     }
     
     private func formatTime(_ time: Double) -> String {
