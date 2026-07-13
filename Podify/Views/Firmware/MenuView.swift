@@ -45,6 +45,9 @@ struct MenuView: View {
                                     case .shuffleToggle:
                                         Image(systemName: "shuffle")
                                             .font(.system(size: 10, weight: .bold))
+                                    case .brokenFolder:
+                                        Image(systemName: "exclamationmark.triangle")
+                                            .font(.system(size: 10, weight: .bold))
                                     case .back:
                                         EmptyView()
                                     }

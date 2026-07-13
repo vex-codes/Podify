@@ -15,8 +15,8 @@ struct ScreenContainer: View {
                     Group {
                         if viewModel.isNowPlayingPresented {
                             NowPlayingView()
-                        } else if viewModel.isCoverFlowPresented, let playlist = viewModel.selectedPlaylist {
-                            CoverFlowView(playlist: playlist, scrollIndex: viewModel.scrollIndex)
+                        } else if viewModel.isCoverFlowPresented {
+                            CoverFlowView(tracks: viewModel.playbackQueue, scrollIndex: viewModel.scrollIndex)
                         } else if viewModel.isSettingsPresented {
                             SettingsView(viewModel: viewModel)
                         } else {

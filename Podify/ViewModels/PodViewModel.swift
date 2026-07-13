@@ -31,22 +31,49 @@ class PodViewModel: ObservableObject {
     @Published var isNowPlayingPresented = false
     @Published var isSettingsPresented = false
     @Published var isCoverFlowPresented = false
-    @Published var selectedPlaylist: Playlist?
-    @Published var isShuffleEnabled = false {
+    @Published var selectedPlaylist: Playlist? {
         didSet {
-            rebuildMainMenu()
+            updatePlaybackQueue()
         }
     }
     
-    var currentFolderURL: URL?
-    var allTracks: [Track] = []
+    @Published var playbackQueue: [Track] = []
     
-    init() {
-        loadMockData()
+    @Published var isShuffleEnabled = false {
+        didSet {
+            AudioEngine.shared.isShuffleEnabled = isShuffleEnabled
+            rebuildMainMenu()
+            updatePlaybackQueue()
+        }
     }
     
-    func loadMockData() {
-        rebuildMainMenu()
+    private func updatePlaybackQueue() {
+        guard let playlist = selectedPlaylist else {
+            playbackQueue = []
+            return
+        }
+        playbackQueue = isShuffleEnabled ? playlist.tracks.shuffled() : playlist.tracks
+    }
+    
+    var relinkingFolderId: UUID? = nil
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        LibraryManager.shared.$syncedFolders
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.rebuildMainMenu()
+                }
+            }
+            .store(in: &cancellables)
+            
+        LibraryManager.shared.$playlists
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.rebuildMainMenu()
+                }
+            }
+            .store(in: &cancellables)
     }
     
     private func rebuildMainMenu() {
@@ -58,11 +85,15 @@ class PodViewModel: ObservableObject {
         
         var newMenu = [syncItem, npItem, settingsItem, shuffleItem]
         
-        for item in currentMenu {
-            if case .playlist = item.type {
-                newMenu.append(item)
-            } else if case .track = item.type {
-                newMenu.append(item)
+        for folder in LibraryManager.shared.syncedFolders {
+            if folder.isBroken {
+                newMenu.append(MenuItem(title: "! " + folder.displayName, type: .brokenFolder(folder)))
+            } else {
+                if let playlist = LibraryManager.shared.playlists.first(where: { $0.folderURL?.lastPathComponent == folder.displayName }) {
+                    newMenu.append(MenuItem(title: folder.displayName, type: .playlist(playlist)))
+                } else {
+                    newMenu.append(MenuItem(title: folder.displayName, type: .folder))
+                }
             }
         }
         
@@ -75,10 +106,9 @@ class PodViewModel: ObservableObject {
         }
         
         if isCoverFlowPresented {
-            if let playlist = selectedPlaylist, scrollIndex >= 0 && scrollIndex < playlist.tracks.count {
-                let currentTrack = playlist.tracks[scrollIndex]
-                let playQueue = isShuffleEnabled ? playlist.tracks.shuffled() : playlist.tracks
-                AudioEngine.shared.play(track: currentTrack, in: playQueue)
+            if scrollIndex >= 0 && scrollIndex < playbackQueue.count {
+                let currentTrack = playbackQueue[scrollIndex]
+                AudioEngine.shared.play(track: currentTrack, in: playbackQueue)
                 isNowPlayingPresented = true
             }
             return
@@ -88,6 +118,7 @@ class PodViewModel: ObservableObject {
         let selected = currentMenu[scrollIndex]
         
         if selected.title == "Sync Folder..." {
+            relinkingFolderId = nil
             isShowingDocumentPicker = true
         } else if selected.title == "Now Playing" {
             if AudioEngine.shared.currentTrack != nil {
@@ -102,9 +133,9 @@ class PodViewModel: ObservableObject {
             selectedPlaylist = playlist
             isCoverFlowPresented = true
             scrollIndex = 0
-        } else if case .track(let track) = selected.type {
-            AudioEngine.shared.play(track: track, in: allTracks)
-            isNowPlayingPresented = true
+        } else if case .brokenFolder(let folder) = selected.type {
+            relinkingFolderId = folder.id
+            isShowingDocumentPicker = true
         }
     }
     
@@ -121,28 +152,8 @@ class PodViewModel: ObservableObject {
     }
     
     func syncFolder(url: URL) {
-        if let oldURL = currentFolderURL {
-            oldURL.stopAccessingSecurityScopedResource()
-        }
-        currentFolderURL = url
-        isLoading = true
-        
-        FileScanner.shared.scanFolder(at: url) { [weak self] playlist in
-            guard let self = self, let playlist = playlist else { return }
-            self.isLoading = false
-            let syncItem = MenuItem(title: "Sync Folder...", type: .folder)
-            let npItem = MenuItem(title: "Now Playing", type: .folder)
-            let settingsItem = MenuItem(title: "Settings", type: .folder)
-            let shuffleState = self.isShuffleEnabled ? "On" : "Off"
-            let shuffleItem = MenuItem(title: "Shuffle: " + shuffleState, type: .shuffleToggle)
-            
-            let playlistItem = MenuItem(title: playlist.title, type: .playlist(playlist))
-            
-            self.allTracks = playlist.tracks
-            self.currentMenu = [syncItem, npItem, settingsItem, shuffleItem, playlistItem]
-            self.scrollIndex = 0
-            print("Found \\(playlist.tracks.count) MP3s")
-        }
+        LibraryManager.shared.addOrUpdateFolder(from: url, relinkingId: relinkingFolderId)
+        relinkingFolderId = nil
     }
 }
 
@@ -512,7 +523,7 @@ struct CoverFlowItemView: View {
 // MARK: - CoverFlowView
 struct CoverFlowView: View {
     @EnvironmentObject var themeManager: ThemeManager
-    let playlist: Playlist
+    let tracks: [Track]
     let scrollIndex: Int
     
     var body: some View {
@@ -525,8 +536,8 @@ struct CoverFlowView: View {
                 let offset = (geometry.size.width - itemWidth) / 2 - CGFloat(scrollIndex) * totalItemWidth
                 
                 HStack(spacing: spacing) {
-                    ForEach(0..<playlist.tracks.count, id: \.self) { index in
-                        let track = playlist.tracks[index]
+                    ForEach(0..<tracks.count, id: \.self) { index in
+                        let track = tracks[index]
                         
                         CoverFlowItemView(
                             track: track,
@@ -548,8 +559,8 @@ struct CoverFlowView: View {
             }
             
             VStack(spacing: 4) {
-                if playlist.tracks.indices.contains(scrollIndex) {
-                    let currentTrack = playlist.tracks[scrollIndex]
+                if tracks.indices.contains(scrollIndex) {
+                    let currentTrack = tracks[scrollIndex]
                     Text(currentTrack.title)
                         .font(.custom(themeManager.currentTheme.fontName, size: 14))
                         .bold()

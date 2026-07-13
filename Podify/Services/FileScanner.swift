@@ -67,18 +67,11 @@ class FileScanner {
     private init() {}
     
     func scanFolder(at url: URL, completion: @escaping (Playlist?) -> Void) {
-        guard url.startAccessingSecurityScopedResource() else {
-            print("Failed to access security scoped resource.")
-            completion(nil)
-            return
-        }
-        
         DispatchQueue.global(qos: .userInitiated).async {
             var tracks: [Track] = []
             let fileManager = FileManager.default
             
             guard let enumerator = fileManager.enumerator(at: url, includingPropertiesForKeys: [.isRegularFileKey]) else {
-                url.stopAccessingSecurityScopedResource()
                 DispatchQueue.main.async { completion(nil) }
                 return
             }
