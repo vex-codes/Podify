@@ -322,7 +322,49 @@ struct ThemeFactory {
         fontName: "Silkscreen-Regular"
     )
     
-    static let presets = [classicMono, atomicGreen, sunsetOrange]
+    static let cyberpunk = Theme(
+        id: "cyberpunk",
+        name: "Cyberpunk",
+        chassisColor: Color(red: 25/255, green: 25/255, blue: 35/255),
+        backgroundColor: Color(red: 10/255, green: 10/255, blue: 20/255),
+        accentColor: Color(red: 255/255, green: 0/255, blue: 255/255),
+        textColor: Color(red: 0/255, green: 255/255, blue: 255/255),
+        secondaryTextColor: Color(red: 0/255, green: 255/255, blue: 255/255).opacity(0.6),
+        bezelColor: Color(red: 255/255, green: 0/255, blue: 255/255),
+        wheelColor: Color(red: 40/255, green: 40/255, blue: 50/255),
+        centerButtonColor: Color(red: 20/255, green: 20/255, blue: 30/255),
+        fontName: "VT323-Regular"
+    )
+    
+    static let oceanBlue = Theme(
+        id: "oceanBlue",
+        name: "Ocean Blue",
+        chassisColor: Color(red: 15/255, green: 40/255, blue: 80/255),
+        backgroundColor: Color(red: 180/255, green: 220/255, blue: 255/255),
+        accentColor: Color(red: 0/255, green: 100/255, blue: 200/255),
+        textColor: Color(red: 10/255, green: 30/255, blue: 70/255),
+        secondaryTextColor: Color(red: 10/255, green: 30/255, blue: 70/255).opacity(0.6),
+        bezelColor: Color(red: 10/255, green: 80/255, blue: 150/255),
+        wheelColor: Color(red: 240/255, green: 245/255, blue: 255/255),
+        centerButtonColor: Color(white: 0.9),
+        fontName: "Menlo"
+    )
+    
+    static let vaporwave = Theme(
+        id: "vaporwave",
+        name: "Vaporwave",
+        chassisColor: Color(red: 180/255, green: 150/255, blue: 255/255),
+        backgroundColor: Color(red: 255/255, green: 210/255, blue: 230/255),
+        accentColor: Color(red: 0/255, green: 200/255, blue: 200/255),
+        textColor: Color(red: 120/255, green: 0/255, blue: 180/255),
+        secondaryTextColor: Color(red: 120/255, green: 0/255, blue: 180/255).opacity(0.6),
+        bezelColor: Color(red: 0/255, green: 255/255, blue: 200/255),
+        wheelColor: Color(red: 250/255, green: 230/255, blue: 255/255),
+        centerButtonColor: Color(red: 200/255, green: 255/255, blue: 250/255),
+        fontName: "Silkscreen-Regular"
+    )
+    
+    static let presets = [classicMono, atomicGreen, sunsetOrange, cyberpunk, oceanBlue, vaporwave]
 }
 
 extension Color {
