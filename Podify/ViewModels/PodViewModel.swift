@@ -648,6 +648,7 @@ struct CoverFlowView: View {
                 }
                 .offset(x: offset)
                 .frame(maxHeight: .infinity)
+                .offset(y: 10) // Push everything slightly down to prevent top clipping
             }
             
             VStack(spacing: 4) {

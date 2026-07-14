@@ -172,6 +172,7 @@ struct MusicQuizView: View {
                     }
                     .offset(x: offset)
                     .frame(maxHeight: .infinity)
+                    .offset(y: 10)
                 }
                 
                 VStack(spacing: 2) {
