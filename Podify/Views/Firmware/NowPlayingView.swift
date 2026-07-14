@@ -174,7 +174,7 @@ struct PixelVisualizer: View {
         .frame(height: 14, alignment: .bottom)
         .onReceive(timer) { _ in
             if isPlaying {
-                heights = (0..<5).map { _ in CGFloat.random(in: 2...14) }
+                heights = AudioEngine.shared.getMeters()
             }
         }
     }

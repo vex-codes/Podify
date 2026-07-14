@@ -52,6 +52,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
         do {
             player = try AVAudioPlayer(contentsOf: url)
             player?.delegate = self
+            player?.isMeteringEnabled = true
             player?.prepareToPlay()
             player?.play()
             
@@ -144,6 +145,21 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
         commandCenter.previousTrackCommand.addTarget { [weak self] _ in
             self?.previous()
             return .success
+        }
+    }
+    
+
+    func getMeters() -> [CGFloat] {
+        guard state == .playing, let player = player else { return [2, 2, 2, 2, 2] }
+        player.updateMeters()
+        
+        let power = player.averagePower(forChannel: 0)
+        let normalized = max(0, power + 40) / 40.0 
+        
+        return (0..<5).map { _ in
+            let jitter = CGFloat.random(in: 0.5...1.5)
+            let height = CGFloat(normalized) * 14 * jitter
+            return min(14, max(2, height))
         }
     }
     
