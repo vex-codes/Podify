@@ -13,6 +13,8 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E1D9981C30057CE6006C90E6 /* Podify */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = Podify;
 			sourceTree = "<group>";
 		};
@@ -55,6 +57,7 @@
 				E1D9981630057CE6006C90E6 /* Sources */,
 				E1D9981730057CE6006C90E6 /* Frameworks */,
 				E1D9981830057CE6006C90E6 /* Resources */,
+				6A9953FA2170A9A5F64A3787 /* Add Background Modes */,
 			);
 			buildRules = (
 			);
@@ -64,8 +67,6 @@
 				E1D9981C30057CE6006C90E6 /* Podify */,
 			);
 			name = Podify;
-			packageProductDependencies = (
-			);
 			productName = Podify;
 			productReference = E1D9981A30057CE6006C90E6 /* Podify.app */;
 			productType = "com.apple.product-type.application";
@@ -113,6 +114,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6A9953FA2170A9A5F64A3787 /* Add Background Modes */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Add Background Modes";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\n/usr/libexec/PlistBuddy -c \"Add :UIBackgroundModes array\" \"$TARGET_BUILD_DIR/$INFOPLIST_PATH\" || true\n/usr/libexec/PlistBuddy -c \"Add :UIBackgroundModes:0 string audio\" \"$TARGET_BUILD_DIR/$INFOPLIST_PATH\" || true\n  ";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E1D9981630057CE6006C90E6 /* Sources */ = {
@@ -255,9 +277,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9JBAM658FB;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_UIBackgroundModes = "audio";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Podify/PodifyInfo.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -287,9 +311,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9JBAM658FB;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_UIBackgroundModes = "audio";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Podify/PodifyInfo.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
