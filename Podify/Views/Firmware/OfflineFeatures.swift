@@ -298,7 +298,7 @@ struct SettingsThemesView: View {
 struct SettingsMainView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @ObservedObject var viewModel: PodViewModel
-    let options = ["Themes", "Sleep Timer", "Brick Game", "Music Quiz"]
+    let options = ["Themes", "Sleep Timer", "Brick Game"]
     
     var body: some View {
         ScrollView(showsIndicators: false) {
