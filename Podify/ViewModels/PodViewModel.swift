@@ -6,7 +6,6 @@ enum SettingsState {
     case themes
     case sleepTimer
     case brickGame
-    case musicQuiz
 }
 
 class PodViewModel: ObservableObject {
@@ -21,7 +20,6 @@ class PodViewModel: ObservableObject {
                 case .themes: maxCount = ThemeFactory.presets.count + 1
                 case .sleepTimer: maxCount = SleepTimerManager.shared.timerOptions.count
                 case .brickGame: maxCount = 10000
-                case .musicQuiz: maxCount = 5
                 }
             } else {
                 maxCount = currentMenu.count
@@ -194,17 +192,10 @@ class PodViewModel: ObservableObject {
     func selectCurrentItem() {
         if isSettingsPresented {
             if settingsState == .main {
-                let options: [SettingsState] = [.themes, .sleepTimer, .brickGame, .musicQuiz]
+                let options: [SettingsState] = [.themes, .sleepTimer, .brickGame]
                 if scrollIndex >= 0 && scrollIndex < options.count {
                     settingsState = options[scrollIndex]
                     scrollIndex = 0
-                }
-            } else if settingsState == .musicQuiz {
-                let quiz = MusicQuizManager.shared
-                if quiz.gameState == .idle || quiz.gameState == .finished {
-                    quiz.startGame()
-                } else if quiz.gameState == .playing {
-                    quiz.submitAnswer(index: scrollIndex)
                 }
             }
             return

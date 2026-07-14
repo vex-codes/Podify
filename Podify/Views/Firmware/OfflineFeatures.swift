@@ -349,8 +349,6 @@ struct SettingsView: View {
                 SleepTimerView(viewModel: viewModel)
             } else if viewModel.settingsState == .brickGame {
                 BrickGameView(viewModel: viewModel)
-            } else if viewModel.settingsState == .musicQuiz {
-                MusicQuizView(viewModel: viewModel)
             }
         }
         .background(themeManager.currentTheme.backgroundColor)
@@ -362,7 +360,6 @@ struct SettingsView: View {
         case .themes: return "Themes"
         case .sleepTimer: return "Sleep Timer"
         case .brickGame: return "Brick Game"
-        case .musicQuiz: return "Music Quiz"
         }
     }
 }
