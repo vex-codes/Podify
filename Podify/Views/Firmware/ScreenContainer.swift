@@ -14,7 +14,7 @@ struct ScreenContainer: View {
                     
                     Group {
                         if viewModel.isNowPlayingPresented {
-                            NowPlayingView()
+                            NowPlayingView(isScrubbingMode: viewModel.isScrubbingMode)
                         } else if viewModel.isCoverFlowPresented {
                             CoverFlowView(tracks: viewModel.playbackQueue, scrollIndex: viewModel.scrollIndex)
                         } else if viewModel.isSettingsPresented {

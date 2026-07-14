@@ -17,6 +17,9 @@ struct IPodChassisView: View {
                 // Click Wheel
                 ClickWheelView(
                     scrollIndex: $viewModel.scrollIndex,
+                    onScroll: { delta in
+                        viewModel.handleScroll(delta: delta)
+                    },
                     onCenterTap: {
                         if viewModel.isSettingsPresented {
                             if viewModel.settingsState == .main {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ClickWheelView: View {
     @Binding var scrollIndex: Int
+    var onScroll: ((Int) -> Void)? = nil
     var onCenterTap: () -> Void
     var onMenuTap: () -> Void
     var onPlayPauseTap: () -> Void
@@ -54,7 +55,12 @@ struct ClickWheelView: View {
                             let currentAngle = atan2(vector.dy, vector.dx)
                             let angleDifference = currentAngle - lastAngle
                             if abs(angleDifference) > 0.15 {
-                                if angleDifference > 0 { scrollIndex += 1 } else { scrollIndex -= 1 }
+                                let delta = angleDifference > 0 ? 1 : -1
+                                if let onScroll = onScroll {
+                                    onScroll(delta)
+                                } else {
+                                    scrollIndex += delta
+                                }
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                 lastAngle = currentAngle
                             }

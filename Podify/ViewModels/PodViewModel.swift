@@ -6,6 +6,7 @@ enum SettingsState {
     case themes
     case sleepTimer
     case brickGame
+    case musicQuiz
 }
 
 class PodViewModel: ObservableObject {
@@ -16,10 +17,11 @@ class PodViewModel: ObservableObject {
                 maxCount = playlist.tracks.count
             } else if isSettingsPresented {
                 switch settingsState {
-                case .main: maxCount = 3
+                case .main: maxCount = 4
                 case .themes: maxCount = ThemeFactory.presets.count + 1
                 case .sleepTimer: maxCount = SleepTimerManager.shared.timerOptions.count
                 case .brickGame: maxCount = 10000
+                case .musicQuiz: maxCount = 5
                 }
             } else {
                 maxCount = currentMenu.count
@@ -41,7 +43,14 @@ class PodViewModel: ObservableObject {
     @Published var isShowingDocumentPicker = false
     @Published var settingsState: SettingsState = .main
     @Published var isLoading = false
-    @Published var isNowPlayingPresented = false
+    @Published var isNowPlayingPresented = false {
+        didSet {
+            if !isNowPlayingPresented {
+                isScrubbingMode = false
+            }
+        }
+    }
+    @Published var isScrubbingMode = false
     @Published var isSettingsPresented = false
     @Published var isCoverFlowPresented = false {
         didSet {
@@ -174,15 +183,30 @@ class PodViewModel: ObservableObject {
         currentMenu = newMenu
     }
     
+    func handleScroll(delta: Int) {
+        if isNowPlayingPresented && isScrubbingMode {
+            AudioEngine.shared.seek(by: Double(delta * 5)) // scrub 5 seconds per tick
+        } else {
+            scrollIndex += delta
+        }
+    }
+    
     func selectCurrentItem() {
         if isSettingsPresented {
             if settingsState == .main {
-                let options: [SettingsState] = [.themes, .sleepTimer, .brickGame]
+                let options: [SettingsState] = [.themes, .sleepTimer, .brickGame, .musicQuiz]
                 if scrollIndex >= 0 && scrollIndex < options.count {
                     settingsState = options[scrollIndex]
                     scrollIndex = 0
                 }
+            } else if settingsState == .musicQuiz {
+                MusicQuizManager.shared.submitAnswer(index: scrollIndex)
             }
+            return
+        }
+        
+        if isNowPlayingPresented {
+            isScrubbingMode.toggle()
             return
         }
         
@@ -271,7 +295,7 @@ struct ThemeFactory {
         bezelColor: .black,
         wheelColor: Color(white: 0.9),
         centerButtonColor: Color(white: 0.8),
-        fontName: "Menlo"
+        fontName: "Silkscreen-Regular"
     )
     
     static let atomicGreen = Theme(
@@ -285,7 +309,7 @@ struct ThemeFactory {
         bezelColor: Color(red: 57/255, green: 255/255, blue: 20/255),
         wheelColor: Color(white: 0.2),
         centerButtonColor: Color(white: 0.15),
-        fontName: "CourierNewPS-BoldMT"
+        fontName: "VT323-Regular"
     )
     
     static let sunsetOrange = Theme(
@@ -299,7 +323,7 @@ struct ThemeFactory {
         bezelColor: Color(red: 255/255, green: 150/255, blue: 50/255),
         wheelColor: Color(red: 255/255, green: 245/255, blue: 235/255),
         centerButtonColor: Color(red: 240/255, green: 230/255, blue: 220/255),
-        fontName: "Menlo"
+        fontName: "Silkscreen-Regular"
     )
     
     static let presets = [classicMono, atomicGreen, sunsetOrange]
@@ -517,7 +541,7 @@ struct CoverFlowItemView: View {
     
     @State private var artwork: UIImage? = nil
     
-    var body: some View {
+    private var artworkView: some View {
         Group {
             if let image = artwork {
                 Image(uiImage: image)
@@ -535,6 +559,24 @@ struct CoverFlowItemView: View {
         }
         .frame(width: itemWidth, height: itemWidth)
         .border(themeManager.currentTheme.textColor, width: isSelected ? 3 : 1)
+        .clipped()
+    }
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            artworkView
+            
+            artworkView
+                .scaleEffect(y: -1)
+                .mask(
+                    LinearGradient(
+                        gradient: Gradient(colors: [Color.black.opacity(0.6), Color.clear]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .blur(radius: 2)
+        }
         .task(id: track.id) {
             artwork = nil
             if let cached = ImageCache.shared.get(for: track.id.uuidString) {

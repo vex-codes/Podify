@@ -81,6 +81,15 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
         updateNowPlayingInfo()
     }
     
+    func seek(by delta: TimeInterval) {
+        guard let player = player else { return }
+        let newTime = player.currentTime + delta
+        let clampedTime = max(0, min(newTime, duration))
+        player.currentTime = clampedTime
+        progress = clampedTime
+        updateNowPlayingInfo()
+    }
+    
     func next() {
         guard !activeQueue.isEmpty else { return }
         currentIndex = (currentIndex + 1) % activeQueue.count

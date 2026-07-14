@@ -6,6 +6,7 @@ struct NowPlayingView: View {
     @ObservedObject var audioEngine = AudioEngine.shared
     @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.scenePhase) private var scenePhase
+    var isScrubbingMode: Bool
     
     var body: some View {
         VStack(spacing: 12) {
@@ -77,9 +78,11 @@ struct NowPlayingView: View {
                             .frame(height: 10)
                         
                         Rectangle()
-                            .fill(themeManager.currentTheme.textColor)
+                            .fill(isScrubbingMode ? themeManager.currentTheme.accentColor : themeManager.currentTheme.textColor)
                             .frame(width: max(0, geo.size.width * CGFloat(audioEngine.progress / max(1, audioEngine.duration))), height: 10)
+                            .animation(.linear(duration: 0.1), value: audioEngine.progress)
                     }
+                    .border(isScrubbingMode ? themeManager.currentTheme.accentColor : Color.clear, width: 2)
                 }
                 .frame(height: 10)
                 
@@ -104,7 +107,7 @@ struct NowPlayingView: View {
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
         }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .active {
                 let current = audioEngine.currentTrack
                 audioEngine.currentTrack = current

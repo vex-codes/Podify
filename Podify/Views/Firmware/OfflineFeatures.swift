@@ -289,7 +289,7 @@ struct SettingsThemesView: View {
 struct SettingsMainView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @ObservedObject var viewModel: PodViewModel
-    let options = ["Themes", "Sleep Timer", "Brick Game"]
+    let options = ["Themes", "Sleep Timer", "Brick Game", "Music Quiz"]
     
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -340,6 +340,8 @@ struct SettingsView: View {
                 SleepTimerView(viewModel: viewModel)
             } else if viewModel.settingsState == .brickGame {
                 BrickGameView(viewModel: viewModel)
+            } else if viewModel.settingsState == .musicQuiz {
+                MusicQuizView(viewModel: viewModel)
             }
         }
         .background(themeManager.currentTheme.backgroundColor)
@@ -351,6 +353,7 @@ struct SettingsView: View {
         case .themes: return "Themes"
         case .sleepTimer: return "Sleep Timer"
         case .brickGame: return "Brick Game"
+        case .musicQuiz: return "Music Quiz"
         }
     }
 }
