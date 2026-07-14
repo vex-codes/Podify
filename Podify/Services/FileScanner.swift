@@ -8,7 +8,7 @@ class ImageCache {
     private let fileManager = FileManager.default
     
     private var cacheDirectory: URL {
-        fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("ArtworkCache")
+        fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("ArtworkCache_v2")
     }
     
     private init() {

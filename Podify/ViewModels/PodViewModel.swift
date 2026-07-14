@@ -539,8 +539,27 @@ struct CoverFlowItemView: View {
             artwork = nil
             if let cached = ImageCache.shared.get(for: track.id.uuidString) {
                 artwork = cached
+                let debug = "Track: \(track.title), ID: \(track.id), cached: YES, fileURL: \(track.fileURL?.absoluteString ?? "nil")\n"
+                try? debug.appendLineToURL(fileURL: URL(fileURLWithPath: "/tmp/podify_debug.txt"))
             } else {
                 artwork = await ImageCache.shared.loadAsync(for: track)
+                let debug = "Track: \(track.title), ID: \(track.id), cached: NO, loaded: \(artwork != nil), fileURL: \(track.fileURL?.absoluteString ?? "nil")\n"
+                try? debug.appendLineToURL(fileURL: URL(fileURLWithPath: "/tmp/podify_debug.txt"))
+            }
+        }
+    }
+}
+
+extension String {
+    func appendLineToURL(fileURL: URL) throws {
+        if let data = self.data(using: .utf8) {
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                let fileHandle = try FileHandle(forWritingTo: fileURL)
+                fileHandle.seekToEndOfFile()
+                fileHandle.write(data)
+                fileHandle.closeFile()
+            } else {
+                try data.write(to: fileURL, options: .atomic)
             }
         }
     }
