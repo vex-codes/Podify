@@ -200,7 +200,12 @@ class PodViewModel: ObservableObject {
                     scrollIndex = 0
                 }
             } else if settingsState == .musicQuiz {
-                MusicQuizManager.shared.submitAnswer(index: scrollIndex)
+                let quiz = MusicQuizManager.shared
+                if quiz.gameState == .idle || quiz.gameState == .finished {
+                    quiz.startGame()
+                } else if quiz.gameState == .playing {
+                    quiz.submitAnswer(index: scrollIndex)
+                }
             }
             return
         }

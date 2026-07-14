@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import AVFoundation
 
 class MusicQuizManager: ObservableObject {
     static let shared = MusicQuizManager()
@@ -12,7 +13,9 @@ class MusicQuizManager: ObservableObject {
     @Published var gameState: GameState = .idle
     @Published var selectedAnswerIndex: Int? = nil
     @Published var timeRemaining = 5
+    
     var timer: Timer?
+    private var player: AVAudioPlayer?
     
     enum GameState: Equatable {
         case idle
@@ -46,9 +49,19 @@ class MusicQuizManager: ObservableObject {
         gameState = .playing
         
         if let correctTrack = correctTrack {
-            AudioEngine.shared.updateQueue(with: [correctTrack])
-            AudioEngine.shared.play(track: correctTrack, in: [correctTrack])
-            AudioEngine.shared.seek(by: 30) 
+            if AudioEngine.shared.state == .playing {
+                AudioEngine.shared.togglePlayPause()
+            }
+            
+            if let url = correctTrack.fileURL {
+                do {
+                    player = try AVAudioPlayer(contentsOf: url)
+                    player?.currentTime = 30.0 // Seek 30 seconds
+                    player?.play()
+                } catch {
+                    print("MusicQuiz error: Could not play track - \(error)")
+                }
+            }
             
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
                 DispatchQueue.main.async {
@@ -57,9 +70,7 @@ class MusicQuizManager: ObservableObject {
                         self.timeRemaining -= 1
                     } else {
                         self.timer?.invalidate()
-                        if AudioEngine.shared.state == .playing {
-                            AudioEngine.shared.togglePlayPause()
-                        }
+                        self.player?.pause()
                     }
                 }
             }
@@ -69,6 +80,7 @@ class MusicQuizManager: ObservableObject {
     func submitAnswer(index: Int) {
         guard gameState == .playing, index >= 0, index < options.count else { return }
         timer?.invalidate()
+        player?.pause()
         selectedAnswerIndex = index
         
         if options[index].id == correctTrack?.id {
@@ -76,10 +88,6 @@ class MusicQuizManager: ObservableObject {
             gameState = .answered(isCorrect: true)
         } else {
             gameState = .answered(isCorrect: false)
-        }
-        
-        if AudioEngine.shared.state == .playing {
-            AudioEngine.shared.togglePlayPause() // Pause music
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
@@ -94,9 +102,8 @@ class MusicQuizManager: ObservableObject {
     
     func stopGame() {
         timer?.invalidate()
-        if AudioEngine.shared.state == .playing {
-            AudioEngine.shared.togglePlayPause()
-        }
+        player?.stop()
+        player = nil
         gameState = .idle
     }
 }
@@ -117,9 +124,6 @@ struct MusicQuizView: View {
                 Text("Press Center to Start")
                     .font(.custom(themeManager.currentTheme.fontName, size: 12))
                     .padding(.top, 16)
-                    .onAppear {
-                        quizManager.startGame()
-                    }
             } else if quizManager.gameState == .finished {
                 Text("Game Over")
                     .font(.custom(themeManager.currentTheme.fontName, size: 16))
@@ -147,7 +151,7 @@ struct MusicQuizView: View {
                 }
                 
                 GeometryReader { geometry in
-                    let itemWidth = geometry.size.width * 0.45
+                    let itemWidth = min(geometry.size.width * 0.45, geometry.size.height * 0.7)
                     let spacing: CGFloat = -20
                     let totalItemWidth = itemWidth + spacing
                     let offset = (geometry.size.width - itemWidth) / 2 - CGFloat(viewModel.scrollIndex) * totalItemWidth
@@ -172,7 +176,6 @@ struct MusicQuizView: View {
                     }
                     .offset(x: offset)
                     .frame(maxHeight: .infinity)
-                    .offset(y: 10)
                 }
                 
                 VStack(spacing: 2) {
