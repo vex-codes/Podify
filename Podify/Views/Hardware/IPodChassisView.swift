@@ -25,7 +25,7 @@ struct IPodChassisView: View {
                             if viewModel.settingsState == .main {
                                 viewModel.selectCurrentItem()
                             } else if viewModel.settingsState == .themes {
-                                let themes = ["classicMono", "atomicGreen", "sunsetOrange", "custom"]
+                                let themes = ThemeFactory.presets.map { $0.id } + ["custom"]
                                 if viewModel.scrollIndex >= 0 && viewModel.scrollIndex < themes.count {
                                     themeManager.applyTheme(id: themes[viewModel.scrollIndex])
                                 }
