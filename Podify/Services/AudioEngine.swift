@@ -156,7 +156,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
         let power = player.averagePower(forChannel: 0)
         let normalized = max(0, power + 40) / 40.0 
         
-        return (0..<5).map { _ in
+        return (0..<12).map { _ in
             let jitter = CGFloat.random(in: 0.5...1.5)
             let height = CGFloat(normalized) * 14 * jitter
             return min(14, max(2, height))

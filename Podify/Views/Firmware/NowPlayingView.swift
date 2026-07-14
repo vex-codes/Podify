@@ -159,12 +159,12 @@ struct PixelVisualizer: View {
     var color: Color
     var isPlaying: Bool
     
-    @State private var heights: [CGFloat] = [2, 4, 3, 5, 2]
+    @State private var heights: [CGFloat] = Array(repeating: 2, count: 12)
     private let timer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
     
     var body: some View {
         HStack(alignment: .bottom, spacing: 2) {
-            ForEach(0..<5, id: \.self) { index in
+            ForEach(0..<12, id: \.self) { index in
                 Rectangle()
                     .fill(color)
                     .frame(width: 4, height: isPlaying ? heights[index] : 2)
