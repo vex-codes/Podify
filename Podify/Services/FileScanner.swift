@@ -8,7 +8,7 @@ class ImageCache {
     private let fileManager = FileManager.default
     
     private var cacheDirectory: URL {
-        fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("ArtworkCache_v3")
+        fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("ArtworkCache_v4")
     }
     
     private init() {
@@ -18,7 +18,7 @@ class ImageCache {
     func set(_ image: UIImage, for key: String) {
         ramCache.setObject(image, forKey: NSString(string: key))
         
-        let fileURL = cacheDirectory.appendingPathComponent("\\(key).jpg")
+        let fileURL = cacheDirectory.appendingPathComponent("\(key).jpg")
         if !fileManager.fileExists(atPath: fileURL.path) {
             if let data = image.jpegData(compressionQuality: 0.8) {
                 try? data.write(to: fileURL)
@@ -31,7 +31,7 @@ class ImageCache {
             return image
         }
         
-        let fileURL = cacheDirectory.appendingPathComponent("\\(key).jpg")
+        let fileURL = cacheDirectory.appendingPathComponent("\(key).jpg")
         if let data = try? Data(contentsOf: fileURL), let image = UIImage(data: data) {
             ramCache.setObject(image, forKey: NSString(string: key))
             return image
