@@ -19,9 +19,15 @@ struct IPodChassisView: View {
                     scrollIndex: $viewModel.scrollIndex,
                     onCenterTap: {
                         if viewModel.isSettingsPresented {
-                            let themes = ["classicMono", "atomicGreen", "sunsetOrange", "custom"]
-                            if viewModel.scrollIndex >= 0 && viewModel.scrollIndex < themes.count {
-                                themeManager.applyTheme(id: themes[viewModel.scrollIndex])
+                            if viewModel.settingsState == .main {
+                                viewModel.selectCurrentItem()
+                            } else if viewModel.settingsState == .themes {
+                                let themes = ["classicMono", "atomicGreen", "sunsetOrange", "custom"]
+                                if viewModel.scrollIndex >= 0 && viewModel.scrollIndex < themes.count {
+                                    themeManager.applyTheme(id: themes[viewModel.scrollIndex])
+                                }
+                            } else if viewModel.settingsState == .sleepTimer {
+                                SleepTimerManager.shared.toggleTimer(index: viewModel.scrollIndex)
                             }
                         } else {
                             viewModel.selectCurrentItem()

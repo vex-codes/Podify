@@ -1,6 +1,13 @@
 import SwiftUI
 import Combine
 
+enum SettingsState {
+    case main
+    case themes
+    case sleepTimer
+    case brickGame
+}
+
 class PodViewModel: ObservableObject {
     @Published var scrollIndex: Int = 0 {
         didSet {
@@ -27,6 +34,7 @@ class PodViewModel: ObservableObject {
     @Published var currentMenu: [MenuItem] = []
     
     @Published var isShowingDocumentPicker = false
+    @Published var settingsState: SettingsState = .main
     @Published var isLoading = false
     @Published var isNowPlayingPresented = false
     @Published var isSettingsPresented = false
@@ -163,6 +171,13 @@ class PodViewModel: ObservableObject {
     
     func selectCurrentItem() {
         if isSettingsPresented {
+            if settingsState == .main {
+                let options: [SettingsState] = [.themes, .sleepTimer, .brickGame]
+                if scrollIndex >= 0 && scrollIndex < options.count {
+                    settingsState = options[scrollIndex]
+                    scrollIndex = 0
+                }
+            }
             return
         }
         
@@ -208,8 +223,13 @@ class PodViewModel: ObservableObject {
             isCoverFlowPresented = false
             scrollIndex = 0
         } else if isSettingsPresented {
-            isSettingsPresented = false
-            scrollIndex = 0
+            if settingsState != .main {
+                settingsState = .main
+                scrollIndex = 0
+            } else {
+                isSettingsPresented = false
+                scrollIndex = 0
+            }
         }
     }
     
@@ -425,68 +445,6 @@ class ThemeManager: ObservableObject {
     }
 }
 
-// MARK: - SettingsView
-struct SettingsView: View {
-    @EnvironmentObject var themeManager: ThemeManager
-    @ObservedObject var viewModel: PodViewModel
-    
-    let themeOptions = ThemeFactory.presets.map { $0.id } + ["custom"]
-    let themeNames = ThemeFactory.presets.map { $0.name } + ["Custom"]
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text("Settings")
-                    .font(.custom(themeManager.currentTheme.fontName, size: 14))
-                    .bold()
-                Spacer()
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(themeManager.currentTheme.accentColor.opacity(0.1))
-            .foregroundColor(themeManager.currentTheme.textColor)
-            
-            Divider().background(themeManager.currentTheme.textColor)
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    ForEach(0..<themeOptions.count, id: \.self) { index in
-                        HStack {
-                            Text(themeNames[index])
-                                .font(.custom(themeManager.currentTheme.fontName, size: 14))
-                            Spacer()
-                            if themeManager.activeThemeId == themeOptions[index] {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                        .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
-                        .background(viewModel.scrollIndex == index ? themeManager.currentTheme.accentColor : Color.clear)
-                    }
-                    
-                    if themeManager.activeThemeId == "custom" {
-                        VStack(spacing: 8) {
-                            ColorPicker("Chassis", selection: $themeManager.customChassisColor)
-                            ColorPicker("Background", selection: $themeManager.customBackgroundColor)
-                            ColorPicker("Accent", selection: $themeManager.customAccentColor)
-                            ColorPicker("Text", selection: $themeManager.customTextColor)
-                            ColorPicker("Bezel", selection: $themeManager.customBezelColor)
-                            ColorPicker("Wheel", selection: $themeManager.customWheelColor)
-                            ColorPicker("Center Btn", selection: $themeManager.customCenterButtonColor)
-                        }
-                        .font(.custom(themeManager.currentTheme.fontName, size: 12))
-                        .foregroundColor(themeManager.currentTheme.textColor)
-                        .padding(.horizontal, 8)
-                        .padding(.top, 8)
-                        .padding(.bottom, 16)
-                    }
-                }
-            }
-        }
-        .background(themeManager.currentTheme.backgroundColor)
-    }
-}
 
 class StatusBarManager: ObservableObject {
     @Published var currentTimeString = ""
