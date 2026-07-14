@@ -175,8 +175,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
         
         if let url = track.fileURL {
             DispatchQueue.global(qos: .background).async {
-                let asset = AVAsset(url: url)
-                if let image = FileScanner.shared.extractArtwork(for: asset) {
+                if let image = FileScanner.shared.extractArtwork(for: url) {
                     let artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
                     DispatchQueue.main.async {
                         info[MPMediaItemPropertyArtwork] = artwork

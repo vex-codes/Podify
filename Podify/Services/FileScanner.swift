@@ -8,7 +8,7 @@ class ImageCache {
     private let fileManager = FileManager.default
     
     private var cacheDirectory: URL {
-        fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("ArtworkCache_v2")
+        fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("ArtworkCache_v3")
     }
     
     private init() {
@@ -49,8 +49,7 @@ class ImageCache {
         
         return await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
-                let asset = AVAsset(url: url)
-                if let image = FileScanner.shared.extractArtwork(for: asset) {
+                if let image = FileScanner.shared.extractArtwork(for: url) {
                     self.set(image, for: track.id.uuidString)
                     continuation.resume(returning: image)
                 } else {
@@ -104,7 +103,7 @@ class FileScanner {
                     tracks.append(track)
                     
                     // Extract and cache artwork immediately
-                    if let image = self.extractArtwork(for: asset) {
+                    if let image = self.extractArtwork(for: fileURL) {
                         ImageCache.shared.set(image, for: track.id.uuidString)
                     }
                 }
@@ -122,8 +121,9 @@ class FileScanner {
     
     private let artworkQueue = DispatchQueue(label: "com.podify.artworkQueue")
     
-    func extractArtwork(for asset: AVAsset) -> UIImage? {
+    func extractArtwork(for url: URL) -> UIImage? {
         return artworkQueue.sync {
+            let asset = AVAsset(url: url)
             let metadata = asset.commonMetadata
             for item in metadata {
                 if item.commonKey == .commonKeyArtwork, let data = item.dataValue {
