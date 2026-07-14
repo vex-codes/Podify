@@ -77,7 +77,7 @@ class FileScanner {
             
             for case let fileURL as URL in enumerator {
                 if fileURL.pathExtension.lowercased() == "mp3" {
-                    let asset = AVAsset(url: fileURL)
+                    let asset = AVURLAsset(url: fileURL)
                     
                     var title = fileURL.deletingPathExtension().lastPathComponent
                     var artist = "Unknown Artist"
@@ -123,7 +123,7 @@ class FileScanner {
     
     func extractArtwork(for url: URL) -> UIImage? {
         return artworkQueue.sync {
-            let asset = AVAsset(url: url)
+            let asset = AVURLAsset(url: url)
             let metadata = asset.commonMetadata
             for item in metadata {
                 if item.commonKey == .commonKeyArtwork, let data = item.dataValue {

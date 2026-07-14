@@ -406,6 +406,10 @@ class ThemeManager: ObservableObject {
         get { UserDefaults.standard.string(forKey: "customCenterButtonHex") ?? "CCCCCC" }
         set { UserDefaults.standard.set(newValue, forKey: "customCenterButtonHex") }
     }
+    var customFontName: String {
+        get { UserDefaults.standard.string(forKey: "customFontName") ?? "Menlo" }
+        set { UserDefaults.standard.set(newValue, forKey: "customFontName"); updateCustomTheme() }
+    }
     
     var customChassisColor: Color {
         get { Color(hex: customChassisHex) }
@@ -468,7 +472,7 @@ class ThemeManager: ObservableObject {
                 bezelColor: customBezelColor,
                 wheelColor: customWheelColor,
                 centerButtonColor: customCenterButtonColor,
-                fontName: "Menlo"
+                fontName: customFontName
             )
         }
     }
@@ -538,6 +542,7 @@ struct CoverFlowItemView: View {
     let track: Track
     let itemWidth: CGFloat
     let isSelected: Bool
+    var showReflection: Bool = true
     
     @State private var artwork: UIImage? = nil
     
@@ -566,16 +571,18 @@ struct CoverFlowItemView: View {
         VStack(spacing: 0) {
             artworkView
             
-            artworkView
-                .scaleEffect(y: -1)
-                .mask(
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.black.opacity(0.6), Color.clear]),
-                        startPoint: .top,
-                        endPoint: .bottom
+            if showReflection {
+                artworkView
+                    .scaleEffect(y: -1)
+                    .mask(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.black.opacity(0.6), Color.clear]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
-                .blur(radius: 2)
+                    .blur(radius: 2)
+            }
         }
         .task(id: track.id) {
             artwork = nil
@@ -616,7 +623,7 @@ struct CoverFlowView: View {
     var body: some View {
         VStack(spacing: 0) {
             GeometryReader { geometry in
-                let itemWidth = geometry.size.width * 0.5
+                let itemWidth = geometry.size.width * 0.45
                 let spacing: CGFloat = -20
                 let totalItemWidth = itemWidth + spacing
                 
@@ -633,7 +640,7 @@ struct CoverFlowView: View {
                             .degrees(index == scrollIndex ? 0 : (index < scrollIndex ? 45 : -45)),
                             axis: (x: 0, y: 1, z: 0)
                         )
-                        .scaleEffect(index == scrollIndex ? 1.1 : 0.8)
+                        .scaleEffect(index == scrollIndex ? 1.05 : 0.75)
                         .opacity(index == scrollIndex ? 1.0 : 0.6)
                         .zIndex(index == scrollIndex ? 1 : 0)
                         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: scrollIndex)

@@ -28,13 +28,15 @@ class SleepTimerManager: ObservableObject {
         isActive = true
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            guard let self = self else { return }
-            if self.remainingSeconds > 0 {
-                self.remainingSeconds -= 1
-            } else {
-                self.cancelTimer()
-                if AudioEngine.shared.state == .playing {
-                    AudioEngine.shared.togglePlayPause()
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                if self.remainingSeconds > 0 {
+                    self.remainingSeconds -= 1
+                } else {
+                    self.cancelTimer()
+                    if AudioEngine.shared.state == .playing {
+                        AudioEngine.shared.togglePlayPause()
+                    }
                 }
             }
         }
@@ -185,7 +187,7 @@ struct BrickGameView: View {
         .onDisappear {
             engine.stopGame()
         }
-        .onChange(of: viewModel.scrollIndex) { newIndex in
+        .onChange(of: viewModel.scrollIndex) { oldIndex, newIndex in
             engine.movePaddle(delta: newIndex > engine.lastScrollIndex ? 1 : -1)
             engine.lastScrollIndex = newIndex
         }
@@ -273,6 +275,13 @@ struct SettingsThemesView: View {
                         ColorPicker("Bezel", selection: $themeManager.customBezelColor)
                         ColorPicker("Wheel", selection: $themeManager.customWheelColor)
                         ColorPicker("Center Btn", selection: $themeManager.customCenterButtonColor)
+                        
+                        Picker("Font", selection: $themeManager.customFontName) {
+                            Text("Menlo").tag("Menlo")
+                            Text("Silkscreen").tag("Silkscreen")
+                            Text("VT323").tag("VT323")
+                        }
+                        .pickerStyle(.menu)
                     }
                     .font(.custom(themeManager.currentTheme.fontName, size: 12))
                     .foregroundColor(themeManager.currentTheme.textColor)

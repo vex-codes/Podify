@@ -13,6 +13,8 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E1D9981C30057CE6006C90E6 /* Podify */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = Podify;
 			sourceTree = "<group>";
 		};
