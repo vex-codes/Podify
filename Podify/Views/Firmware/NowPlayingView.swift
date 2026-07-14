@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import Combine
 
 struct NowPlayingView: View {
     @ObservedObject var audioEngine = AudioEngine.shared
@@ -57,11 +58,12 @@ struct NowPlayingView: View {
             
             Spacer()
             
-            HStack {
+            HStack(alignment: .bottom) {
                 Text("(^_^)")
                     .font(.custom(themeManager.currentTheme.fontName, size: 14))
                     .foregroundColor(themeManager.currentTheme.secondaryTextColor)
                 Spacer()
+                PixelVisualizer(color: themeManager.currentTheme.textColor, isPlaying: audioEngine.state == .playing)
             }
             .padding(.horizontal, 16)
             .padding(.bottom, -4)
@@ -148,6 +150,31 @@ struct ArtworkView: View {
                 image = cached
             } else {
                 image = await ImageCache.shared.loadAsync(for: track)
+            }
+        }
+    }
+}
+
+struct PixelVisualizer: View {
+    var color: Color
+    var isPlaying: Bool
+    
+    @State private var heights: [CGFloat] = [2, 4, 3, 5, 2]
+    private let timer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
+    
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 2) {
+            ForEach(0..<5, id: \.self) { index in
+                Rectangle()
+                    .fill(color)
+                    .frame(width: 4, height: isPlaying ? heights[index] : 2)
+                    .animation(.linear(duration: 0.15), value: heights)
+            }
+        }
+        .frame(height: 14, alignment: .bottom)
+        .onReceive(timer) { _ in
+            if isPlaying {
+                heights = (0..<5).map { _ in CGFloat.random(in: 2...14) }
             }
         }
     }
