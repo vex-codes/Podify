@@ -536,6 +536,7 @@ struct CoverFlowItemView: View {
         .frame(width: itemWidth, height: itemWidth)
         .border(themeManager.currentTheme.textColor, width: isSelected ? 3 : 1)
         .task(id: track.id) {
+            artwork = nil
             if let cached = ImageCache.shared.get(for: track.id.uuidString) {
                 artwork = cached
             } else {
@@ -561,9 +562,7 @@ struct CoverFlowView: View {
                 let offset = (geometry.size.width - itemWidth) / 2 - CGFloat(scrollIndex) * totalItemWidth
                 
                 HStack(spacing: spacing) {
-                    ForEach(0..<tracks.count, id: \.self) { index in
-                        let track = tracks[index]
-                        
+                    ForEach(Array(tracks.enumerated()), id: \.element.id) { index, track in
                         CoverFlowItemView(
                             track: track,
                             itemWidth: itemWidth,

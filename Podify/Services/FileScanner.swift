@@ -120,13 +120,17 @@ class FileScanner {
         }
     }
     
+    private let artworkQueue = DispatchQueue(label: "com.podify.artworkQueue")
+    
     func extractArtwork(for asset: AVAsset) -> UIImage? {
-        let metadata = asset.commonMetadata
-        for item in metadata {
-            if item.commonKey == .commonKeyArtwork, let data = item.dataValue {
-                return UIImage(data: data)
+        return artworkQueue.sync {
+            let metadata = asset.commonMetadata
+            for item in metadata {
+                if item.commonKey == .commonKeyArtwork, let data = item.dataValue {
+                    return UIImage(data: data)
+                }
             }
+            return nil
         }
-        return nil
     }
 }

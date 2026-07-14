@@ -146,6 +146,7 @@ struct ArtworkView: View {
                 image = nil
                 return
             }
+            image = nil
             if let cached = ImageCache.shared.get(for: track.id.uuidString) {
                 image = cached
             } else {
