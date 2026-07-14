@@ -199,22 +199,39 @@ struct SleepTimerView: View {
     @ObservedObject var sleepTimer = SleepTimerManager.shared
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(spacing: 0) {
-                ForEach(0..<sleepTimer.timerOptions.count, id: \.self) { index in
-                    let option = sleepTimer.timerOptions[index]
-                    HStack {
-                        Text(option == 0 ? "Off" : "\\(option) Minutes")
-                            .font(.custom(themeManager.currentTheme.fontName, size: 14))
-                        Spacer()
-                        if (sleepTimer.isActive && option == sleepTimer.remainingSeconds / 60) || (!sleepTimer.isActive && option == 0) {
-                            Image(systemName: "checkmark")
+        VStack(spacing: 0) {
+            if sleepTimer.isActive {
+                HStack {
+                    Image(systemName: "timer")
+                    Text(String(format: "%02d:%02d", sleepTimer.remainingSeconds / 60, sleepTimer.remainingSeconds % 60))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 16))
+                        .bold()
+                }
+                .foregroundColor(themeManager.currentTheme.textColor)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .background(themeManager.currentTheme.accentColor.opacity(0.1))
+                
+                Divider().background(themeManager.currentTheme.textColor)
+            }
+            
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    ForEach(0..<sleepTimer.timerOptions.count, id: \.self) { index in
+                        let option = sleepTimer.timerOptions[index]
+                        HStack {
+                            Text(option == 0 ? "Off" : "\(option) Minutes")
+                                .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                            Spacer()
+                            if (sleepTimer.isActive && option == sleepTimer.remainingSeconds / 60) || (!sleepTimer.isActive && option == 0) {
+                                Image(systemName: "checkmark")
+                            }
                         }
+                        .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(viewModel.scrollIndex == index ? themeManager.currentTheme.accentColor : Color.clear)
                     }
-                    .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 6)
-                    .background(viewModel.scrollIndex == index ? themeManager.currentTheme.accentColor : Color.clear)
                 }
             }
         }

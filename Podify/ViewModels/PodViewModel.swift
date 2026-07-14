@@ -15,7 +15,12 @@ class PodViewModel: ObservableObject {
             if isCoverFlowPresented, let playlist = selectedPlaylist {
                 maxCount = playlist.tracks.count
             } else if isSettingsPresented {
-                maxCount = 4
+                switch settingsState {
+                case .main: maxCount = 3
+                case .themes: maxCount = ThemeFactory.presets.count + 1
+                case .sleepTimer: maxCount = SleepTimerManager.shared.timerOptions.count
+                case .brickGame: maxCount = 10000
+                }
             } else {
                 maxCount = currentMenu.count
             }
