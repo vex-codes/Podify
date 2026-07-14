@@ -1,7 +1,7 @@
 import Foundation
 
 struct Track: Identifiable, Hashable, Codable {
-    let id = UUID()
+    var id = UUID()
     let title: String
     let artist: String
     let album: String
@@ -9,7 +9,7 @@ struct Track: Identifiable, Hashable, Codable {
 }
 
 struct Playlist: Identifiable, Hashable, Codable {
-    let id = UUID()
+    var id = UUID()
     let title: String
     let tracks: [Track]
     let folderURL: URL?

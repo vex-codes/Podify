@@ -66,25 +66,25 @@ class BrickGameEngine: ObservableObject {
     let paddleWidth: CGFloat = 40
     let paddleHeight: CGFloat = 6
     
-    // iPod classic screen resolution approximations
-    let gameWidth: CGFloat = 220
-    let gameHeight: CGFloat = 160
+    // Dynamic screen resolution
+    var gameWidth: CGFloat = 220
+    var gameHeight: CGFloat = 160
     
     var lastScrollIndex = 0
     private var displayLink: CADisplayLink?
     
     func startGame() {
-        ballPos = CGPoint(x: 110, y: 120)
-        paddlePos = 90
+        ballPos = CGPoint(x: gameWidth / 2, y: gameHeight / 2)
+        paddlePos = (gameWidth - paddleWidth) / 2
         ballVelocity = CGPoint(x: 2.5, y: -2.5)
         
         bricks = []
         let cols = 5
         let rows = 4
-        let bWidth: CGFloat = 36
+        let bWidth: CGFloat = (gameWidth - 20) / CGFloat(cols) - 4
         let bHeight: CGFloat = 12
         let padding: CGFloat = 4
-        let startX = (gameWidth - (CGFloat(cols) * bWidth + CGFloat(cols - 1) * padding)) / 2 + 15
+        let startX: CGFloat = 10
         for r in 0..<rows {
             for c in 0..<cols {
                 let rect = CGRect(
@@ -109,14 +109,14 @@ class BrickGameEngine: ObservableObject {
     
     func movePaddle(delta: Int) {
         paddlePos += CGFloat(delta * 12)
-        paddlePos = max(0, min(gameWidth - paddleWidth + 20, paddlePos))
+        paddlePos = max(0, min(gameWidth - paddleWidth, paddlePos))
     }
     
     @objc func update() {
         ballPos.x += ballVelocity.x
         ballPos.y += ballVelocity.y
         
-        if ballPos.x <= 0 || ballPos.x + ballSize >= gameWidth + 30 {
+        if ballPos.x <= 0 || ballPos.x + ballSize >= gameWidth {
             ballVelocity.x *= -1
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
@@ -125,13 +125,13 @@ class BrickGameEngine: ObservableObject {
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
         
-        if ballPos.y > gameHeight + 40 {
+        if ballPos.y > gameHeight + 10 {
             startGame() 
             UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
             return
         }
         
-        let paddleRect = CGRect(x: paddlePos, y: gameHeight - paddleHeight + 10, width: paddleWidth, height: paddleHeight)
+        let paddleRect = CGRect(x: paddlePos, y: gameHeight - paddleHeight, width: paddleWidth, height: paddleHeight)
         let ballRect = CGRect(x: ballPos.x, y: ballPos.y, width: ballSize, height: ballSize)
         
         if ballRect.intersects(paddleRect) && ballVelocity.y > 0 {
@@ -159,24 +159,28 @@ struct BrickGameView: View {
     @StateObject private var engine = BrickGameEngine()
     
     var body: some View {
-        Canvas { context, size in
-            let ballRect = CGRect(x: engine.ballPos.x, y: engine.ballPos.y, width: engine.ballSize, height: engine.ballSize)
-            context.fill(Path(ellipseIn: ballRect), with: .color(themeManager.currentTheme.textColor))
-            
-            let paddleRect = CGRect(x: engine.paddlePos, y: engine.gameHeight - engine.paddleHeight + 10, width: engine.paddleWidth, height: engine.paddleHeight)
-            context.fill(Path(paddleRect), with: .color(themeManager.currentTheme.textColor))
-            
-            for brick in engine.bricks {
-                if !brick.isBroken {
-                    let rect = CGRect(x: brick.rect.minX + 1, y: brick.rect.minY + 1, width: brick.rect.width - 2, height: brick.rect.height - 2)
-                    context.fill(Path(rect), with: .color(themeManager.currentTheme.textColor))
+        GeometryReader { geo in
+            Canvas { context, size in
+                let ballRect = CGRect(x: engine.ballPos.x, y: engine.ballPos.y, width: engine.ballSize, height: engine.ballSize)
+                context.fill(Path(ellipseIn: ballRect), with: .color(themeManager.currentTheme.textColor))
+                
+                let paddleRect = CGRect(x: engine.paddlePos, y: engine.gameHeight - engine.paddleHeight, width: engine.paddleWidth, height: engine.paddleHeight)
+                context.fill(Path(paddleRect), with: .color(themeManager.currentTheme.textColor))
+                
+                for brick in engine.bricks {
+                    if !brick.isBroken {
+                        let rect = CGRect(x: brick.rect.minX + 1, y: brick.rect.minY + 1, width: brick.rect.width - 2, height: brick.rect.height - 2)
+                        context.fill(Path(rect), with: .color(themeManager.currentTheme.textColor))
+                    }
                 }
             }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear {
-            engine.lastScrollIndex = viewModel.scrollIndex
-            engine.startGame()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .onAppear {
+                engine.gameWidth = geo.size.width
+                engine.gameHeight = geo.size.height
+                engine.lastScrollIndex = viewModel.scrollIndex
+                engine.startGame()
+            }
         }
         .onDisappear {
             engine.stopGame()
