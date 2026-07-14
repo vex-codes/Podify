@@ -499,7 +499,7 @@ class StatusBarManager: ObservableObject {
         updateTime()
         updateBattery()
         
-        timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.updateTime()
             self?.updateBattery()
         }
