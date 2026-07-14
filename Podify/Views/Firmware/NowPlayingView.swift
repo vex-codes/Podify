@@ -95,8 +95,12 @@ struct NowPlayingView: View {
         }
         .background(themeManager.currentTheme.backgroundColor)
         .onAppear {
+            UIApplication.shared.isIdleTimerDisabled = true
             let current = audioEngine.currentTrack
             audioEngine.currentTrack = current
+        }
+        .onDisappear {
+            UIApplication.shared.isIdleTimerDisabled = false
         }
         .onChange(of: scenePhase) { newPhase in
             if newPhase == .active {

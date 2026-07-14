@@ -20,18 +20,12 @@ struct PodifyApp: App {
     @Environment(\.scenePhase) private var scenePhase
     
     init() {
-        UIApplication.shared.isIdleTimerDisabled = true
     }
     
     var body: some Scene {
         WindowGroup {
             IPodChassisView()
                 .environmentObject(themeManager)
-        }
-        .onChange(of: scenePhase) { newPhase in
-            if newPhase == .active {
-                LibraryManager.shared.autoSync()
-            }
         }
     }
 }
