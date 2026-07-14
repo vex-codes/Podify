@@ -16,6 +16,7 @@ class MusicQuizManager: ObservableObject {
     
     var timer: Timer?
     private var player: AVAudioPlayer?
+    var wasPlayingBeforeQuiz = false
     
     enum GameState: Equatable {
         case idle
@@ -25,9 +26,30 @@ class MusicQuizManager: ObservableObject {
     }
     
     func startGame() {
-        score = 0
-        round = 1
+        if options.isEmpty || gameState == .finished {
+            score = 0
+            round = 1
+        }
         nextRound()
+    }
+    
+    func onEnterQuiz() {
+        if AudioEngine.shared.state == .playing {
+            wasPlayingBeforeQuiz = true
+            AudioEngine.shared.togglePlayPause()
+        } else {
+            wasPlayingBeforeQuiz = false
+        }
+    }
+    
+    func onExitQuiz() {
+        stopGame()
+        if wasPlayingBeforeQuiz {
+            if AudioEngine.shared.state == .paused {
+                AudioEngine.shared.togglePlayPause()
+            }
+            wasPlayingBeforeQuiz = false
+        }
     }
     
     func nextRound() {
@@ -49,10 +71,6 @@ class MusicQuizManager: ObservableObject {
         gameState = .playing
         
         if let correctTrack = correctTrack {
-            if AudioEngine.shared.state == .playing {
-                AudioEngine.shared.togglePlayPause()
-            }
-            
             if let url = correctTrack.fileURL {
                 do {
                     player = try AVAudioPlayer(contentsOf: url)
@@ -111,7 +129,7 @@ class MusicQuizManager: ObservableObject {
 struct MusicQuizView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @ObservedObject var viewModel: PodViewModel
-    @StateObject private var quizManager = MusicQuizManager.shared
+    @ObservedObject private var quizManager = MusicQuizManager.shared
     
     var body: some View {
         VStack(spacing: 8) {
@@ -196,8 +214,11 @@ struct MusicQuizView: View {
         .padding(.vertical, 8)
         .foregroundColor(themeManager.currentTheme.textColor)
         .background(themeManager.currentTheme.backgroundColor)
+        .onAppear {
+            quizManager.onEnterQuiz()
+        }
         .onDisappear {
-            quizManager.stopGame()
+            quizManager.onExitQuiz()
         }
     }
 }
