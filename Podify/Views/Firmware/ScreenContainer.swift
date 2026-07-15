@@ -7,7 +7,6 @@ struct ScreenContainer: View {
     var body: some View {
         Rectangle()
             .fill(themeManager.currentTheme.backgroundColor)
-            .aspectRatio(4/3, contentMode: .fit)
             .overlay(
                 VStack(spacing: 0) {
                     StatusBarView()

@@ -9,7 +9,7 @@ struct IPodChassisView: View {
             // Main chassis background
             themeManager.currentTheme.chassisColor.edgesIgnoringSafeArea(.all)
             
-            VStack(spacing: 40) {
+            VStack(spacing: 20) {
                 // Screen Area
                 ScreenContainer(viewModel: viewModel)
                     .padding(.horizontal, 30)
@@ -41,8 +41,11 @@ struct IPodChassisView: View {
                     onNextTap: { AudioEngine.shared.next() },
                     onPrevTap: { AudioEngine.shared.previous() }
                 )
+                .aspectRatio(1.0, contentMode: .fit)
+                .padding(.horizontal, 40)
             }
-            .padding(.vertical, 40)
+            .padding(.top, 10)
+            .padding(.bottom, 30)
         }
         .sheet(isPresented: $viewModel.isShowingDocumentPicker) {
             DocumentPicker { url in
