@@ -126,7 +126,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     
     private func startTimer() {
         stopTimer()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             guard let self = self, let player = self.player else { return }
             self.progress = player.currentTime
         }

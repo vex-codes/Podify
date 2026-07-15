@@ -184,7 +184,7 @@ struct PixelVisualizer: View {
                 Rectangle()
                     .fill(color)
                     .frame(width: 4, height: isPlaying ? heights[index] : 2)
-                    .animation(.linear(duration: 0.15), value: heights)
+                    .animation(.linear(duration: 0.066), value: heights)
             }
         }
         .frame(height: 14, alignment: .bottom)
@@ -192,7 +192,7 @@ struct PixelVisualizer: View {
             if isPlaying {
                 while !Task.isCancelled {
                     heights = AudioEngine.shared.getMeters()
-                    try? await Task.sleep(nanoseconds: 150_000_000)
+                    try? await Task.sleep(nanoseconds: 66_000_000)
                 }
             }
         }
