@@ -241,7 +241,6 @@ struct BrickGameView: View {
                         Text("YOU WIN!")
                             .font(.custom(themeManager.currentTheme.fontName, size: 26))
                             .foregroundColor(themeManager.currentTheme.textColor)
-                            .applyThemeShadow(themeManager: themeManager)
                             .bold()
                         Spacer()
                     }
@@ -264,6 +263,7 @@ struct BrickGameView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
+            .applyThemeShadow(themeManager: themeManager)
             .background(ThemeBackgroundView())
             .onAppear {
                 engine.gameWidth = geo.size.width

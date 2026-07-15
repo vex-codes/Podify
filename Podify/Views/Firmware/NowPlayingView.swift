@@ -43,14 +43,8 @@ struct NowPlayingView: View {
                         ArtworkView(track: audioEngine.currentTrack)
                     )
                     .border(themeManager.currentTheme.accentColor, width: 2)
-                    .background(
-                        Rectangle()
-                            .fill(themeManager.currentTheme.accentColor)
-                            .frame(width: 180, height: 180)
-                            .shadow(color: themeManager.currentTheme.accentColor, radius: 15)
-                            .opacity(audioEngine.state == .playing ? (isGlowing ? 0.8 : 0.2) : 0)
-                            .animation(audioEngine.state == .playing ? Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true) : .default, value: isGlowing)
-                    )
+                    .shadow(color: themeManager.currentTheme.accentColor.opacity(audioEngine.state == .playing ? (isGlowing ? 0.8 : 0.2) : 0), radius: isGlowing ? 15 : 5)
+                    .animation(audioEngine.state == .playing ? Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true) : .default, value: isGlowing)
                     .onAppear {
                         isGlowing = true
                     }
@@ -71,7 +65,6 @@ struct NowPlayingView: View {
                         .multilineTextAlignment(.center)
                 }
                 .foregroundColor(themeManager.currentTheme.textColor)
-                .applyThemeShadow(themeManager: themeManager)
             .padding(.horizontal, 16)
             
             Spacer()
@@ -80,7 +73,6 @@ struct NowPlayingView: View {
                 Text("(^_^)")
                     .font(.custom(themeManager.currentTheme.fontName, size: 14))
                     .foregroundColor(themeManager.currentTheme.secondaryTextColor)
-                    .applyThemeShadow(themeManager: themeManager)
                 Spacer()
                 PixelVisualizer(color: themeManager.currentTheme.textColor, isPlaying: audioEngine.state == .playing)
             }
@@ -111,12 +103,12 @@ struct NowPlayingView: View {
                     Text("-" + formatTime(audioEngine.duration - audioEngine.progress))
                         .font(.custom(themeManager.currentTheme.fontName, size: 10))
                 }
-                .applyThemeShadow(themeManager: themeManager)
             }
             .foregroundColor(themeManager.currentTheme.textColor)
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
             }
+            .applyThemeShadow(themeManager: themeManager)
             .background(ThemeBackgroundView(isCoverFlow: true))
         }
         .background(themeManager.currentTheme.backgroundColor)
@@ -185,6 +177,7 @@ struct PixelVisualizer: View {
     var isPlaying: Bool
     
     @State private var heights: [CGFloat] = Array(repeating: 2, count: 12)
+    let timer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
     
     var body: some View {
         HStack(alignment: .bottom, spacing: 2) {
@@ -196,13 +189,9 @@ struct PixelVisualizer: View {
             }
         }
         .frame(height: 14, alignment: .bottom)
-        .drawingGroup()
-        .task(id: isPlaying) {
+        .onReceive(timer) { _ in
             if isPlaying {
-                while !Task.isCancelled {
-                    heights = AudioEngine.shared.getMeters()
-                    try? await Task.sleep(nanoseconds: 150_000_000)
-                }
+                heights = AudioEngine.shared.getMeters()
             }
         }
     }

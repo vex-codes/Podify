@@ -675,7 +675,6 @@ struct CoverFlowItemView: View {
                     .blur(radius: 2)
             }
         }
-        .drawingGroup()
         .task(id: track.id) {
             artwork = nil
             if let cached = ImageCache.shared.get(for: track.id.uuidString) {
