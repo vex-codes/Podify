@@ -239,7 +239,7 @@ struct BrickGameView: View {
                     VStack {
                         Spacer()
                         Text("YOU WIN!")
-                            .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 26))
                             .foregroundColor(themeManager.currentTheme.textColor)
                             .bold()
                         Spacer()
@@ -294,7 +294,7 @@ struct SleepTimerView: View {
             HStack {
                 Image(systemName: "timer")
                 Text(sleepTimer.stage == .running ? "TIMER RUNNING" : "SET TIMER")
-                    .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 16))
                     .bold()
                 Spacer()
             }
@@ -314,14 +314,14 @@ struct SleepTimerView: View {
                 let s = sleepTimer.remainingSeconds % 60
                 
                 Text(String(format: "%02d:%02d:%02d", h, m, s))
-                    .font(.custom(themeManager.currentTheme.fontName, size: 32))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 34))
                     .foregroundColor(themeManager.currentTheme.textColor)
                     .bold()
                 
                 Spacer()
                 
                 Text("Cancel")
-                    .font(.custom(themeManager.currentTheme.fontName, size: 16))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 18))
                     .foregroundColor(themeManager.currentTheme.backgroundColor)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
@@ -331,39 +331,39 @@ struct SleepTimerView: View {
                     // Hours
                     VStack {
                         Text("HR")
-                            .font(.custom(themeManager.currentTheme.fontName, size: 10))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 12))
                         Text(String(format: "%02d", sleepTimer.stage == .hours ? viewModel.scrollIndex : sleepTimer.selectedHours))
-                            .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 26))
                             .padding(4)
                             .background(sleepTimer.stage == .hours ? themeManager.currentTheme.textColor : Color.clear)
                             .foregroundColor(sleepTimer.stage == .hours ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
                     }
                     
                     Text(":")
-                        .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 26))
                         .padding(.top, 14)
                     
                     // Minutes
                     VStack {
                         Text("MIN")
-                            .font(.custom(themeManager.currentTheme.fontName, size: 10))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 12))
                         Text(String(format: "%02d", sleepTimer.stage == .minutes ? viewModel.scrollIndex : sleepTimer.selectedMinutes))
-                            .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 26))
                             .padding(4)
                             .background(sleepTimer.stage == .minutes ? themeManager.currentTheme.textColor : Color.clear)
                             .foregroundColor(sleepTimer.stage == .minutes ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
                     }
                     
                     Text(":")
-                        .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 26))
                         .padding(.top, 14)
                     
                     // Seconds
                     VStack {
                         Text("SEC")
-                            .font(.custom(themeManager.currentTheme.fontName, size: 10))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 12))
                         Text(String(format: "%02d", sleepTimer.stage == .seconds ? viewModel.scrollIndex : sleepTimer.selectedSeconds))
-                            .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 26))
                             .padding(4)
                             .background(sleepTimer.stage == .seconds ? themeManager.currentTheme.textColor : Color.clear)
                             .foregroundColor(sleepTimer.stage == .seconds ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
@@ -374,7 +374,7 @@ struct SleepTimerView: View {
                 Spacer()
                 
                 Text(sleepTimer.stage == .hours ? "Set Hours" : (sleepTimer.stage == .minutes ? "Set Minutes" : "Set Seconds"))
-                    .font(.custom(themeManager.currentTheme.fontName, size: 12))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 14))
                     .foregroundColor(themeManager.currentTheme.textColor)
                 Spacer()
             }
@@ -400,7 +400,7 @@ struct SettingsThemesView: View {
                 ForEach(0..<themeOptions.count, id: \.self) { index in
                     HStack {
                         Text(themeNames[index])
-                            .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 16))
                         Spacer()
                         if themeManager.activeThemeId == themeOptions[index] {
                             Image(systemName: "checkmark")
@@ -435,7 +435,7 @@ struct SettingsThemesView: View {
                         }
                         .pickerStyle(.menu)
                     }
-                    .font(.custom(themeManager.currentTheme.fontName, size: 12))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 14))
                     .foregroundColor(themeManager.currentTheme.textColor)
                     .padding(.horizontal, 8)
                     .padding(.top, 8)
@@ -460,10 +460,10 @@ struct SettingsMainView: View {
                 ForEach(0..<options.count, id: \.self) { index in
                     HStack {
                         Text(options[index])
-                            .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 16))
                         Spacer()
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 10, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                     }
                     .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
                     .padding(.horizontal, 8)
@@ -486,7 +486,7 @@ struct SettingsView: View {
         VStack(spacing: 0) {
             HStack {
                 Text(headerTitle)
-                    .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 16))
                     .bold()
                 Spacer()
             }

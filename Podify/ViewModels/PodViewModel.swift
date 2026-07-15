@@ -647,7 +647,7 @@ struct CoverFlowItemView: View {
             }
         }
         .frame(width: itemWidth, height: itemWidth)
-        .border(themeManager.currentTheme.textColor, width: isSelected ? 3 : 1)
+        .border(themeManager.currentTheme.accentColor, width: isSelected ? 3 : 1)
         .clipped()
     }
     
@@ -707,7 +707,7 @@ struct CoverFlowView: View {
     var body: some View {
         VStack(spacing: 0) {
             GeometryReader { geometry in
-                let itemWidth = geometry.size.width * 0.45
+                let itemWidth = geometry.size.width * 0.55
                 let spacing: CGFloat = -20
                 let totalItemWidth = itemWidth + spacing
                 
@@ -732,18 +732,18 @@ struct CoverFlowView: View {
                 }
                 .offset(x: offset)
                 .frame(maxHeight: .infinity)
-                .offset(y: 10) // Push everything slightly down to prevent top clipping
+                .offset(y: 40) // Push everything slightly down to prevent top clipping
             }
             
             VStack(spacing: 4) {
                 if tracks.indices.contains(scrollIndex) {
                     let currentTrack = tracks[scrollIndex]
                     Text(currentTrack.title)
-                        .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 16))
                         .bold()
                         .lineLimit(1)
                     Text(currentTrack.artist)
-                        .font(.custom(themeManager.currentTheme.fontName, size: 12))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 14))
                         .lineLimit(1)
                 }
             }

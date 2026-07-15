@@ -42,6 +42,7 @@ struct NowPlayingView: View {
                     .overlay(
                         ArtworkView(track: audioEngine.currentTrack)
                     )
+                    .border(themeManager.currentTheme.accentColor, width: 2)
                     .shadow(color: themeManager.currentTheme.accentColor.opacity(audioEngine.state == .playing ? (isGlowing ? 0.8 : 0.2) : 0), radius: isGlowing ? 15 : 5)
                     .animation(audioEngine.state == .playing ? Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true) : .default, value: isGlowing)
                     .onAppear {
