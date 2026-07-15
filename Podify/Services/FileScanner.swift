@@ -101,11 +101,6 @@ class FileScanner {
                     
                     let track = Track(title: title, artist: artist, album: album, fileURL: fileURL)
                     tracks.append(track)
-                    
-                    // Extract and cache artwork immediately
-                    if let image = self.extractArtwork(for: fileURL) {
-                        ImageCache.shared.set(image, for: track.id.uuidString)
-                    }
                 }
             }
             

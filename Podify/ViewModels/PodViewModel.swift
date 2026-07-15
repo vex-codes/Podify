@@ -718,26 +718,32 @@ struct CoverFlowView: View {
                 let spacing: CGFloat = -20
                 let totalItemWidth = itemWidth + spacing
                 
-                let offset = (geometry.size.width - itemWidth) / 2 - CGFloat(scrollIndex) * totalItemWidth
+                let windowRadius = 4
+                let startIndex = max(0, scrollIndex - windowRadius)
+                let endIndex = min(tracks.count - 1, scrollIndex + windowRadius)
                 
-                HStack(spacing: spacing) {
-                    ForEach(Array(tracks.enumerated()), id: \.element.id) { index, track in
-                        CoverFlowItemView(
-                            track: track,
-                            itemWidth: itemWidth,
-                            isSelected: index == scrollIndex
-                        )
-                        .rotation3DEffect(
-                            .degrees(index == scrollIndex ? 0 : (index < scrollIndex ? 45 : -45)),
-                            axis: (x: 0, y: 1, z: 0)
-                        )
-                        .scaleEffect(index == scrollIndex ? 1.05 : 0.75)
-                        .opacity(index == scrollIndex ? 1.0 : 0.6)
-                        .zIndex(index == scrollIndex ? 1 : 0)
-                        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: scrollIndex)
+                ZStack {
+                    if startIndex <= endIndex && !tracks.isEmpty {
+                        ForEach(startIndex...endIndex, id: \.self) { index in
+                            let track = tracks[index]
+                            
+                            CoverFlowItemView(
+                                track: track,
+                                itemWidth: itemWidth,
+                                isSelected: index == scrollIndex
+                            )
+                            .rotation3DEffect(
+                                .degrees(index == scrollIndex ? 0 : (index < scrollIndex ? 45 : -45)),
+                                axis: (x: 0, y: 1, z: 0)
+                            )
+                            .scaleEffect(index == scrollIndex ? 1.05 : 0.75)
+                            .opacity(index == scrollIndex ? 1.0 : 0.6)
+                            .zIndex(index == scrollIndex ? 1 : 0)
+                            .offset(x: CGFloat(index - scrollIndex) * totalItemWidth)
+                            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: scrollIndex)
+                        }
                     }
                 }
-                .offset(x: offset)
                 .frame(maxHeight: .infinity)
                 .offset(y: 40) // Push everything slightly down to prevent top clipping
             }
