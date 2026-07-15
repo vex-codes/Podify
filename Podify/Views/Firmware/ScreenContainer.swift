@@ -27,5 +27,6 @@ struct ScreenContainer: View {
                 .padding(4) // Bezel padding
             )
             .border(themeManager.currentTheme.bezelColor, width: 2) // Inner bezel
+            .clipped()
     }
 }

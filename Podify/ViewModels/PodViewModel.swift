@@ -750,6 +750,7 @@ struct CoverFlowView: View {
             .foregroundColor(themeManager.currentTheme.textColor)
             .padding(.bottom, 16)
         }
+        .applyThemeShadow(themeManager: themeManager)
         .background(ThemeBackgroundView(isCoverFlow: true))
         .background(themeManager.currentTheme.backgroundColor)
         .clipped()

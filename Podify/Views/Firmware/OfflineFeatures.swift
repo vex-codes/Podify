@@ -9,14 +9,30 @@ struct ThemeBackgroundView: View {
     var body: some View {
         Group {
             if themeManager.activeThemeId == "custom", let bg = themeManager.currentTheme.backgroundImage {
-                Image(bg)
-                    .resizable()
-                    .scaledToFill()
-                    .opacity(isCoverFlow ? 0.3 : 1.0)
-                    .clipped()
+                GeometryReader { geo in
+                    Image(bg)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .opacity(isCoverFlow ? 0.3 : 1.0)
+                        .clipped()
+                }
+                .clipped()
             } else {
                 Color.clear
             }
+        }
+    }
+}
+
+// MARK: - Shadow Modifier
+extension View {
+    @ViewBuilder
+    func applyThemeShadow(themeManager: ThemeManager) -> some View {
+        if themeManager.activeThemeId == "custom", themeManager.currentTheme.backgroundImage != nil {
+            self.shadow(color: themeManager.currentTheme.backgroundColor.opacity(0.8), radius: 2, x: 1, y: 1)
+        } else {
+            self
         }
     }
 }
@@ -247,6 +263,7 @@ struct BrickGameView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
+            .applyThemeShadow(themeManager: themeManager)
             .background(ThemeBackgroundView())
             .onAppear {
                 engine.gameWidth = geo.size.width
@@ -362,6 +379,7 @@ struct SleepTimerView: View {
                 Spacer()
             }
             }
+            .applyThemeShadow(themeManager: themeManager)
             .background(ThemeBackgroundView())
         }
     }
@@ -424,6 +442,7 @@ struct SettingsThemesView: View {
                 }
             }
         }
+        .applyThemeShadow(themeManager: themeManager)
         .background(ThemeBackgroundView())
     }
 }
@@ -452,6 +471,7 @@ struct SettingsMainView: View {
                 }
             }
         }
+        .applyThemeShadow(themeManager: themeManager)
         .background(ThemeBackgroundView())
     }
 }

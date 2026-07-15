@@ -66,6 +66,7 @@ struct MenuView: View {
                         proxy.scrollTo(newIndex, anchor: .center)
                     }
                 }
+                .applyThemeShadow(themeManager: themeManager)
                 .background(ThemeBackgroundView())
             }
         }

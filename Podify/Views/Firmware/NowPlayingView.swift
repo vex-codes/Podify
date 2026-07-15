@@ -99,6 +99,7 @@ struct NowPlayingView: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
             }
+            .applyThemeShadow(themeManager: themeManager)
             .background(ThemeBackgroundView())
         }
         .background(themeManager.currentTheme.backgroundColor)
