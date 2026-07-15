@@ -13,6 +13,8 @@ class ImageCache {
     
     private init() {
         try? fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+        ramCache.countLimit = 30 // Max 30 images in RAM
+        ramCache.totalCostLimit = 1024 * 1024 * 20 // 20 MB max
     }
     
     func set(_ image: UIImage, for key: String) {
