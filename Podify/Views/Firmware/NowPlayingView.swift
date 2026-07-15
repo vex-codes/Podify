@@ -71,6 +71,7 @@ struct NowPlayingView: View {
                         .multilineTextAlignment(.center)
                 }
                 .foregroundColor(themeManager.currentTheme.textColor)
+                .applyThemeShadow(themeManager: themeManager)
             .padding(.horizontal, 16)
             
             Spacer()
@@ -79,6 +80,7 @@ struct NowPlayingView: View {
                 Text("(^_^)")
                     .font(.custom(themeManager.currentTheme.fontName, size: 14))
                     .foregroundColor(themeManager.currentTheme.secondaryTextColor)
+                    .applyThemeShadow(themeManager: themeManager)
                 Spacer()
                 PixelVisualizer(color: themeManager.currentTheme.textColor, isPlaying: audioEngine.state == .playing)
             }
@@ -109,12 +111,12 @@ struct NowPlayingView: View {
                     Text("-" + formatTime(audioEngine.duration - audioEngine.progress))
                         .font(.custom(themeManager.currentTheme.fontName, size: 10))
                 }
+                .applyThemeShadow(themeManager: themeManager)
             }
             .foregroundColor(themeManager.currentTheme.textColor)
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
             }
-            .applyThemeShadow(themeManager: themeManager)
             .background(ThemeBackgroundView(isCoverFlow: true))
         }
         .background(themeManager.currentTheme.backgroundColor)
@@ -194,6 +196,7 @@ struct PixelVisualizer: View {
             }
         }
         .frame(height: 14, alignment: .bottom)
+        .drawingGroup()
         .task(id: isPlaying) {
             if isPlaying {
                 while !Task.isCancelled {
