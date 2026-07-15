@@ -379,6 +379,7 @@ struct SleepTimerView: View {
                 Spacer()
             }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .applyThemeShadow(themeManager: themeManager)
             .background(ThemeBackgroundView())
         }

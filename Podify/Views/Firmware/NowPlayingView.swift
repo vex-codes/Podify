@@ -6,6 +6,7 @@ struct NowPlayingView: View {
     @ObservedObject var audioEngine = AudioEngine.shared
     @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.scenePhase) private var scenePhase
+    @State private var isGlowing = false
     var isScrubbingMode: Bool
     
     var body: some View {
@@ -37,10 +38,15 @@ struct NowPlayingView: View {
                 // Artwork Placeholder
                 Rectangle()
                     .fill(themeManager.currentTheme.textColor.opacity(0.2))
-                    .frame(width: 140, height: 140)
+                    .frame(width: 180, height: 180)
                     .overlay(
                         ArtworkView(track: audioEngine.currentTrack)
                     )
+                    .shadow(color: themeManager.currentTheme.accentColor.opacity(audioEngine.state == .playing ? (isGlowing ? 0.8 : 0.2) : 0), radius: isGlowing ? 15 : 5)
+                    .animation(audioEngine.state == .playing ? Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true) : .default, value: isGlowing)
+                    .onAppear {
+                        isGlowing = true
+                    }
                 
                 VStack(alignment: .center, spacing: 4) {
                     Text(audioEngine.currentTrack?.title ?? "Unknown")

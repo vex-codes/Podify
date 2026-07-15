@@ -424,31 +424,31 @@ class ThemeManager: ObservableObject {
     
     let availableBackgrounds = [
         CustomBackground(id: "none", name: "None"),
-        CustomBackground(id: "bg_1", name: "#neon"),
-        CustomBackground(id: "bg_2", name: "(_✿_ _♡_‿_♡_)"),
-        CustomBackground(id: "bg_3", name: "Pink starry background"),
-        CustomBackground(id: "bg_4", name: "Wallpaper for you (1)"),
-        CustomBackground(id: "bg_5", name: "Wallpaper for you"),
-        CustomBackground(id: "bg_6", name: "Wallpaper"),
-        CustomBackground(id: "bg_7", name: "_ (1)"),
-        CustomBackground(id: "bg_8", name: "_ (10)"),
-        CustomBackground(id: "bg_9", name: "_ (11)"),
-        CustomBackground(id: "bg_10", name: "_ (12)"),
-        CustomBackground(id: "bg_11", name: "_ (13)"),
-        CustomBackground(id: "bg_12", name: "_ (14)"),
-        CustomBackground(id: "bg_13", name: "_ (2)"),
-        CustomBackground(id: "bg_14", name: "_ (3)"),
-        CustomBackground(id: "bg_15", name: "_ (4)"),
-        CustomBackground(id: "bg_16", name: "_ (5)"),
-        CustomBackground(id: "bg_17", name: "_ (6)"),
-        CustomBackground(id: "bg_18", name: "_ (7)"),
-        CustomBackground(id: "bg_19", name: "_ (8)"),
-        CustomBackground(id: "bg_20", name: "_ (9)"),
-        CustomBackground(id: "bg_21", name: "_"),
-        CustomBackground(id: "bg_22", name: "cool asf"),
-        CustomBackground(id: "bg_23", name: "fondo amarillo"),
-        CustomBackground(id: "bg_24", name: "fondo rosa"),
-        CustomBackground(id: "bg_25", name: "star wallpaper")
+        CustomBackground(id: "bg_1", name: "Background 1"),
+        CustomBackground(id: "bg_2", name: "Background 2"),
+        CustomBackground(id: "bg_3", name: "Background 3"),
+        CustomBackground(id: "bg_4", name: "Background 4"),
+        CustomBackground(id: "bg_5", name: "Background 5"),
+        CustomBackground(id: "bg_6", name: "Background 6"),
+        CustomBackground(id: "bg_7", name: "Background 7"),
+        CustomBackground(id: "bg_8", name: "Background 8"),
+        CustomBackground(id: "bg_9", name: "Background 9"),
+        CustomBackground(id: "bg_10", name: "Background 10"),
+        CustomBackground(id: "bg_11", name: "Background 11"),
+        CustomBackground(id: "bg_12", name: "Background 12"),
+        CustomBackground(id: "bg_13", name: "Background 13"),
+        CustomBackground(id: "bg_14", name: "Background 14"),
+        CustomBackground(id: "bg_15", name: "Background 15"),
+        CustomBackground(id: "bg_16", name: "Background 16"),
+        CustomBackground(id: "bg_17", name: "Background 17"),
+        CustomBackground(id: "bg_18", name: "Background 18"),
+        CustomBackground(id: "bg_19", name: "Background 19"),
+        CustomBackground(id: "bg_20", name: "Background 20"),
+        CustomBackground(id: "bg_21", name: "Background 21"),
+        CustomBackground(id: "bg_22", name: "Background 22"),
+        CustomBackground(id: "bg_23", name: "Background 23"),
+        CustomBackground(id: "bg_24", name: "Background 24"),
+        CustomBackground(id: "bg_25", name: "Background 25")
     ]
     
     var customBackgroundId: String {
@@ -749,8 +749,8 @@ struct CoverFlowView: View {
             }
             .foregroundColor(themeManager.currentTheme.textColor)
             .padding(.bottom, 16)
+            .applyThemeShadow(themeManager: themeManager)
         }
-        .applyThemeShadow(themeManager: themeManager)
         .background(ThemeBackgroundView(isCoverFlow: true))
         .background(themeManager.currentTheme.backgroundColor)
         .clipped()
