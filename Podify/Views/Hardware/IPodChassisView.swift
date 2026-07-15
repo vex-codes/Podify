@@ -30,7 +30,8 @@ struct IPodChassisView: View {
                                     themeManager.applyTheme(id: themes[viewModel.scrollIndex])
                                 }
                             } else if viewModel.settingsState == .sleepTimer {
-                                SleepTimerManager.shared.toggleTimer(index: viewModel.scrollIndex)
+                                SleepTimerManager.shared.advanceStage(scrollIndex: viewModel.scrollIndex)
+                                viewModel.scrollIndex = 0
                             }
                         } else {
                             viewModel.selectCurrentItem()

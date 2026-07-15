@@ -18,7 +18,12 @@ class PodViewModel: ObservableObject {
                 switch settingsState {
                 case .main: maxCount = 3
                 case .themes: maxCount = ThemeFactory.presets.count + 1
-                case .sleepTimer: maxCount = SleepTimerManager.shared.timerOptions.count
+                case .sleepTimer: 
+                    switch SleepTimerManager.shared.stage {
+                    case .hours: maxCount = 24
+                    case .minutes, .seconds: maxCount = 60
+                    case .running: maxCount = 1
+                    }
                 case .brickGame: maxCount = 10000
                 }
             } else {

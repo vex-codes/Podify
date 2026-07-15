@@ -81,6 +81,16 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
         updateNowPlayingInfo()
     }
     
+    func fadeOutAndPause() {
+        guard let player = player else { return }
+        player.setVolume(0.0, fadeDuration: 3.0)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            self.togglePlayPause()
+            player.volume = 1.0 // Reset for future playback
+        }
+    }
+    
     func seek(by delta: TimeInterval) {
         guard let player = player else { return }
         let newTime = player.currentTime + delta

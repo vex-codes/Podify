@@ -2,29 +2,50 @@ import SwiftUI
 import Combine
 
 // MARK: - Sleep Timer Manager
+enum TimerStage {
+    case hours
+    case minutes
+    case seconds
+    case running
+}
+
 class SleepTimerManager: ObservableObject {
     static let shared = SleepTimerManager()
     
-    @Published var remainingMinutes: Int = 0
+    @Published var stage: TimerStage = .hours
+    @Published var selectedHours = 0
+    @Published var selectedMinutes = 0
+    @Published var selectedSeconds = 0
+    
+    @Published var remainingSeconds: Int = 0
     @Published var isActive = false
     private var timer: Timer?
     
-    let timerOptions = [0, 15, 30, 45, 60, 90, 120]
-    
-    func toggleTimer(index: Int) {
-        if index >= 0 && index < timerOptions.count {
-            let selected = timerOptions[index]
-            if selected == 0 {
-                cancelTimer()
-            } else {
-                startTimer(minutes: selected)
-            }
+    func advanceStage(scrollIndex: Int) {
+        switch stage {
+        case .hours:
+            selectedHours = scrollIndex
+            stage = .minutes
+        case .minutes:
+            selectedMinutes = scrollIndex
+            stage = .seconds
+        case .seconds:
+            selectedSeconds = scrollIndex
+            stage = .running
+            startTimer()
+        case .running:
+            cancelTimer()
         }
     }
     
-    func startTimer(minutes: Int) {
-        remainingMinutes = minutes * 60 // Wait, actually it's seconds, but let's just use it as minutes variable for simplicity. I'll just store seconds.
-        remainingSeconds = minutes * 60
+    func startTimer() {
+        remainingSeconds = (selectedHours * 3600) + (selectedMinutes * 60) + selectedSeconds
+        
+        if remainingSeconds == 0 {
+            cancelTimer()
+            return
+        }
+        
         isActive = true
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -35,18 +56,20 @@ class SleepTimerManager: ObservableObject {
                 } else {
                     self.cancelTimer()
                     if AudioEngine.shared.state == .playing {
-                        AudioEngine.shared.togglePlayPause()
+                        AudioEngine.shared.fadeOutAndPause()
                     }
                 }
             }
         }
     }
     
-    @Published var remainingSeconds: Int = 0
-    
     func cancelTimer() {
         isActive = false
+        stage = .hours
         remainingSeconds = 0
+        selectedHours = 0
+        selectedMinutes = 0
+        selectedSeconds = 0
         timer?.invalidate()
         timer = nil
     }
@@ -59,6 +82,12 @@ struct Brick {
 }
 
 class BrickGameEngine: ObservableObject {
+    enum GameState {
+        case playing
+        case won
+    }
+    
+    @Published var gameState: GameState = .playing
     @Published var ballPos = CGPoint(x: 100, y: 120)
     @Published var paddlePos: CGFloat = 80
     @Published var bricks: [Brick] = []
@@ -76,6 +105,7 @@ class BrickGameEngine: ObservableObject {
     private var displayLink: CADisplayLink?
     
     func startGame() {
+        gameState = .playing
         ballPos = CGPoint(x: gameWidth / 2, y: gameHeight / 2)
         paddlePos = (gameWidth - paddleWidth) / 2
         ballVelocity = CGPoint(x: 2.5, y: -2.5)
@@ -148,6 +178,12 @@ class BrickGameEngine: ObservableObject {
                 bricks[i].isBroken = true
                 ballVelocity.y *= -1
                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                
+                if bricks.allSatisfy({ $0.isBroken }) {
+                    gameState = .won
+                    stopGame()
+                }
+                
                 break 
             }
         }
@@ -162,34 +198,48 @@ struct BrickGameView: View {
     
     var body: some View {
         GeometryReader { geo in
-            Canvas { context, size in
-                let ballRect = CGRect(x: engine.ballPos.x, y: engine.ballPos.y, width: engine.ballSize, height: engine.ballSize)
-                context.fill(Path(ellipseIn: ballRect), with: .color(themeManager.currentTheme.textColor))
-                
-                let paddleRect = CGRect(x: engine.paddlePos, y: engine.gameHeight - engine.paddleHeight, width: engine.paddleWidth, height: engine.paddleHeight)
-                context.fill(Path(paddleRect), with: .color(themeManager.currentTheme.textColor))
-                
-                for brick in engine.bricks {
-                    if !brick.isBroken {
-                        let rect = CGRect(x: brick.rect.minX + 1, y: brick.rect.minY + 1, width: brick.rect.width - 2, height: brick.rect.height - 2)
-                        context.fill(Path(rect), with: .color(themeManager.currentTheme.textColor))
+            Group {
+                if engine.gameState == .won {
+                    VStack {
+                        Spacer()
+                        Text("YOU WIN!")
+                            .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                            .foregroundColor(themeManager.currentTheme.textColor)
+                            .bold()
+                        Spacer()
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    Canvas { context, size in
+                        let ballRect = CGRect(x: engine.ballPos.x, y: engine.ballPos.y, width: engine.ballSize, height: engine.ballSize)
+                        context.fill(Path(ellipseIn: ballRect), with: .color(themeManager.currentTheme.textColor))
+                        
+                        let paddleRect = CGRect(x: engine.paddlePos, y: engine.gameHeight - engine.paddleHeight, width: engine.paddleWidth, height: engine.paddleHeight)
+                        context.fill(Path(paddleRect), with: .color(themeManager.currentTheme.textColor))
+                        
+                        for brick in engine.bricks {
+                            if !brick.isBroken {
+                                let rect = CGRect(x: brick.rect.minX + 1, y: brick.rect.minY + 1, width: brick.rect.width - 2, height: brick.rect.height - 2)
+                                context.fill(Path(rect), with: .color(themeManager.currentTheme.textColor))
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .onAppear {
                 engine.gameWidth = geo.size.width
                 engine.gameHeight = geo.size.height
                 engine.lastScrollIndex = viewModel.scrollIndex
                 engine.startGame()
             }
-        }
-        .onDisappear {
-            engine.stopGame()
-        }
-        .onChange(of: viewModel.scrollIndex) { oldIndex, newIndex in
-            engine.movePaddle(delta: newIndex > engine.lastScrollIndex ? 1 : -1)
-            engine.lastScrollIndex = newIndex
+            .onDisappear {
+                engine.stopGame()
+            }
+            .onChange(of: viewModel.scrollIndex) { oldIndex, newIndex in
+                engine.movePaddle(delta: newIndex > engine.lastScrollIndex ? 1 : -1)
+                engine.lastScrollIndex = newIndex
+            }
         }
     }
 }
@@ -202,40 +252,94 @@ struct SleepTimerView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            if sleepTimer.isActive {
-                HStack {
-                    Image(systemName: "timer")
-                    Text(String(format: "%02d:%02d", sleepTimer.remainingSeconds / 60, sleepTimer.remainingSeconds % 60))
-                        .font(.custom(themeManager.currentTheme.fontName, size: 16))
-                        .bold()
-                }
-                .foregroundColor(themeManager.currentTheme.textColor)
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity)
-                .background(themeManager.currentTheme.accentColor.opacity(0.1))
-                
-                Divider().background(themeManager.currentTheme.textColor)
+            // Header
+            HStack {
+                Image(systemName: "timer")
+                Text(sleepTimer.stage == .running ? "TIMER RUNNING" : "SET TIMER")
+                    .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                    .bold()
+                Spacer()
             }
+            .foregroundColor(themeManager.currentTheme.textColor)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 8)
+            .background(themeManager.currentTheme.accentColor.opacity(0.1))
             
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    ForEach(0..<sleepTimer.timerOptions.count, id: \.self) { index in
-                        let option = sleepTimer.timerOptions[index]
-                        HStack {
-                            Text(option == 0 ? "Off" : "\(option) Minutes")
-                                .font(.custom(themeManager.currentTheme.fontName, size: 14))
-                            Spacer()
-                            if (sleepTimer.isActive && option == sleepTimer.remainingSeconds / 60) || (!sleepTimer.isActive && option == 0) {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                        .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 6)
-                        .background(viewModel.scrollIndex == index ? themeManager.currentTheme.accentColor : Color.clear)
+            Divider().background(themeManager.currentTheme.textColor)
+            
+            Spacer()
+            
+            if sleepTimer.stage == .running {
+                let h = sleepTimer.remainingSeconds / 3600
+                let m = (sleepTimer.remainingSeconds % 3600) / 60
+                let s = sleepTimer.remainingSeconds % 60
+                
+                Text(String(format: "%02d:%02d:%02d", h, m, s))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 32))
+                    .foregroundColor(themeManager.currentTheme.textColor)
+                    .bold()
+                
+                Spacer()
+                
+                Text("Cancel")
+                    .font(.custom(themeManager.currentTheme.fontName, size: 16))
+                    .foregroundColor(themeManager.currentTheme.backgroundColor)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(themeManager.currentTheme.textColor)
+            } else {
+                HStack(spacing: 4) {
+                    // Hours
+                    VStack {
+                        Text("HR")
+                            .font(.custom(themeManager.currentTheme.fontName, size: 10))
+                        Text(String(format: "%02d", sleepTimer.stage == .hours ? viewModel.scrollIndex : sleepTimer.selectedHours))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                            .padding(4)
+                            .background(sleepTimer.stage == .hours ? themeManager.currentTheme.textColor : Color.clear)
+                            .foregroundColor(sleepTimer.stage == .hours ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
+                    }
+                    
+                    Text(":")
+                        .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                        .padding(.top, 14)
+                    
+                    // Minutes
+                    VStack {
+                        Text("MIN")
+                            .font(.custom(themeManager.currentTheme.fontName, size: 10))
+                        Text(String(format: "%02d", sleepTimer.stage == .minutes ? viewModel.scrollIndex : sleepTimer.selectedMinutes))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                            .padding(4)
+                            .background(sleepTimer.stage == .minutes ? themeManager.currentTheme.textColor : Color.clear)
+                            .foregroundColor(sleepTimer.stage == .minutes ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
+                    }
+                    
+                    Text(":")
+                        .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                        .padding(.top, 14)
+                    
+                    // Seconds
+                    VStack {
+                        Text("SEC")
+                            .font(.custom(themeManager.currentTheme.fontName, size: 10))
+                        Text(String(format: "%02d", sleepTimer.stage == .seconds ? viewModel.scrollIndex : sleepTimer.selectedSeconds))
+                            .font(.custom(themeManager.currentTheme.fontName, size: 24))
+                            .padding(4)
+                            .background(sleepTimer.stage == .seconds ? themeManager.currentTheme.textColor : Color.clear)
+                            .foregroundColor(sleepTimer.stage == .seconds ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
                     }
                 }
+                .foregroundColor(themeManager.currentTheme.textColor)
+                
+                Spacer()
+                
+                Text(sleepTimer.stage == .hours ? "Set Hours" : (sleepTimer.stage == .minutes ? "Set Minutes" : "Set Seconds"))
+                    .font(.custom(themeManager.currentTheme.fontName, size: 12))
+                    .foregroundColor(themeManager.currentTheme.textColor)
             }
+            
+            Spacer()
         }
     }
 }
