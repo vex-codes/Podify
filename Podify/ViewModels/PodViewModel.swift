@@ -580,10 +580,17 @@ class StatusBarManager: ObservableObject {
         }
     }
     
-    private func updateTime() {
+    private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
-        currentTimeString = formatter.string(from: Date())
+        return formatter
+    }()
+    
+    private func updateTime() {
+        let newTime = Self.timeFormatter.string(from: Date())
+        if currentTimeString != newTime {
+            currentTimeString = newTime
+        }
     }
     
     private func updateBattery() {
@@ -668,6 +675,7 @@ struct CoverFlowItemView: View {
                     .blur(radius: 2)
             }
         }
+        .drawingGroup()
         .task(id: track.id) {
             artwork = nil
             if let cached = ImageCache.shared.get(for: track.id.uuidString) {

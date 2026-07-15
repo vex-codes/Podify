@@ -43,8 +43,14 @@ struct NowPlayingView: View {
                         ArtworkView(track: audioEngine.currentTrack)
                     )
                     .border(themeManager.currentTheme.accentColor, width: 2)
-                    .shadow(color: themeManager.currentTheme.accentColor.opacity(audioEngine.state == .playing ? (isGlowing ? 0.8 : 0.2) : 0), radius: isGlowing ? 15 : 5)
-                    .animation(audioEngine.state == .playing ? Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true) : .default, value: isGlowing)
+                    .background(
+                        Rectangle()
+                            .fill(themeManager.currentTheme.accentColor)
+                            .frame(width: 180, height: 180)
+                            .shadow(color: themeManager.currentTheme.accentColor, radius: 15)
+                            .opacity(audioEngine.state == .playing ? (isGlowing ? 0.8 : 0.2) : 0)
+                            .animation(audioEngine.state == .playing ? Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true) : .default, value: isGlowing)
+                    )
                     .onAppear {
                         isGlowing = true
                     }
@@ -177,7 +183,6 @@ struct PixelVisualizer: View {
     var isPlaying: Bool
     
     @State private var heights: [CGFloat] = Array(repeating: 2, count: 12)
-    private let timer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
     
     var body: some View {
         HStack(alignment: .bottom, spacing: 2) {
@@ -189,9 +194,12 @@ struct PixelVisualizer: View {
             }
         }
         .frame(height: 14, alignment: .bottom)
-        .onReceive(timer) { _ in
+        .task(id: isPlaying) {
             if isPlaying {
-                heights = AudioEngine.shared.getMeters()
+                while !Task.isCancelled {
+                    heights = AudioEngine.shared.getMeters()
+                    try? await Task.sleep(nanoseconds: 150_000_000)
+                }
             }
         }
     }
