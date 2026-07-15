@@ -177,7 +177,6 @@ struct PixelVisualizer: View {
     var isPlaying: Bool
     
     @State private var heights: [CGFloat] = Array(repeating: 2, count: 12)
-    let timer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
     
     var body: some View {
         HStack(alignment: .bottom, spacing: 2) {
@@ -189,9 +188,12 @@ struct PixelVisualizer: View {
             }
         }
         .frame(height: 14, alignment: .bottom)
-        .onReceive(timer) { _ in
+        .task(id: isPlaying) {
             if isPlaying {
-                heights = AudioEngine.shared.getMeters()
+                while !Task.isCancelled {
+                    heights = AudioEngine.shared.getMeters()
+                    try? await Task.sleep(nanoseconds: 150_000_000)
+                }
             }
         }
     }
