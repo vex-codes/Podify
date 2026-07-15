@@ -195,7 +195,7 @@ class PodViewModel: ObservableObject {
                 let options: [SettingsState] = [.themes, .sleepTimer, .brickGame]
                 if scrollIndex >= 0 && scrollIndex < options.count {
                     settingsState = options[scrollIndex]
-                    scrollIndex = 0
+                    scrollIndex = (settingsState == .brickGame) ? 5000 : 0
                 }
             }
             return
