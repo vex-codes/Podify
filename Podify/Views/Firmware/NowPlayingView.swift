@@ -32,30 +32,32 @@ struct NowPlayingView: View {
             Divider().background(themeManager.currentTheme.textColor)
             
             VStack(spacing: 12) {
-                HStack(spacing: 16) {
+                Spacer().frame(height: 8)
+                
                 // Artwork Placeholder
                 Rectangle()
                     .fill(themeManager.currentTheme.textColor.opacity(0.2))
-                    .frame(width: 80, height: 80)
+                    .frame(width: 140, height: 140)
                     .overlay(
                         ArtworkView(track: audioEngine.currentTrack)
                     )
                 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .center, spacing: 4) {
                     Text(audioEngine.currentTrack?.title ?? "Unknown")
-                        .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                        .font(.custom(themeManager.currentTheme.fontName, size: 16))
                         .bold()
                         .lineLimit(1)
+                        .multilineTextAlignment(.center)
                     Text(audioEngine.currentTrack?.artist ?? "Unknown")
+                        .font(.custom(themeManager.currentTheme.fontName, size: 14))
+                        .lineLimit(1)
+                        .multilineTextAlignment(.center)
+                    Text(audioEngine.currentTrack?.album ?? "Unknown")
                         .font(.custom(themeManager.currentTheme.fontName, size: 12))
                         .lineLimit(1)
-                    Text(audioEngine.currentTrack?.album ?? "Unknown")
-                        .font(.custom(themeManager.currentTheme.fontName, size: 10))
-                        .lineLimit(1)
+                        .multilineTextAlignment(.center)
                 }
                 .foregroundColor(themeManager.currentTheme.textColor)
-                Spacer()
-            }
             .padding(.horizontal, 16)
             
             Spacer()
@@ -100,7 +102,7 @@ struct NowPlayingView: View {
             .padding(.bottom, 16)
             }
             .applyThemeShadow(themeManager: themeManager)
-            .background(ThemeBackgroundView())
+            .background(ThemeBackgroundView(isCoverFlow: true))
         }
         .background(themeManager.currentTheme.backgroundColor)
         .onAppear {
