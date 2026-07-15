@@ -9,7 +9,7 @@ struct IPodChassisView: View {
             // Main chassis background
             themeManager.currentTheme.chassisColor.edgesIgnoringSafeArea(.all)
             
-            VStack(spacing: 20) {
+            VStack(spacing: 30) {
                 // Screen Area
                 ScreenContainer(viewModel: viewModel)
                     .padding(.horizontal, 30)

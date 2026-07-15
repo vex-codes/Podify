@@ -16,7 +16,7 @@ class PodViewModel: ObservableObject {
                 maxCount = playlist.tracks.count
             } else if isSettingsPresented {
                 switch settingsState {
-                case .main: maxCount = 4
+                case .main: maxCount = 3
                 case .themes: maxCount = ThemeFactory.presets.count + 1
                 case .sleepTimer: maxCount = SleepTimerManager.shared.timerOptions.count
                 case .brickGame: maxCount = 10000
