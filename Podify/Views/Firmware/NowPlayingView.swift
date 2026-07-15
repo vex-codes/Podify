@@ -31,7 +31,8 @@ struct NowPlayingView: View {
             
             Divider().background(themeManager.currentTheme.textColor)
             
-            HStack(spacing: 16) {
+            VStack(spacing: 12) {
+                HStack(spacing: 16) {
                 // Artwork Placeholder
                 Rectangle()
                     .fill(themeManager.currentTheme.textColor.opacity(0.2))
@@ -93,10 +94,12 @@ struct NowPlayingView: View {
                     Text("-" + formatTime(audioEngine.duration - audioEngine.progress))
                         .font(.custom(themeManager.currentTheme.fontName, size: 10))
                 }
-                .foregroundColor(themeManager.currentTheme.textColor)
             }
+            .foregroundColor(themeManager.currentTheme.textColor)
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
+            }
+            .background(ThemeBackgroundView())
         }
         .background(themeManager.currentTheme.backgroundColor)
         .onAppear {

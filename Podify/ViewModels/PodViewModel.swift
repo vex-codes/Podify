@@ -269,6 +269,11 @@ class PodViewModel: ObservableObject {
     }
 }
 
+struct CustomBackground: Identifiable {
+    let id: String
+    let name: String
+}
+
 // MARK: - Theme Engine
 struct Theme: Identifiable, Equatable {
     let id: String
@@ -282,6 +287,7 @@ struct Theme: Identifiable, Equatable {
     let wheelColor: Color
     let centerButtonColor: Color
     let fontName: String
+    var backgroundImage: String? = nil
 }
 
 struct ThemeFactory {
@@ -416,6 +422,40 @@ extension Color {
 class ThemeManager: ObservableObject {
     @Published var currentTheme: Theme = ThemeFactory.classicMono
     
+    let availableBackgrounds = [
+        CustomBackground(id: "none", name: "None"),
+        CustomBackground(id: "bg_1", name: "#neon"),
+        CustomBackground(id: "bg_2", name: "(_✿_ _♡_‿_♡_)"),
+        CustomBackground(id: "bg_3", name: "Pink starry background"),
+        CustomBackground(id: "bg_4", name: "Wallpaper for you (1)"),
+        CustomBackground(id: "bg_5", name: "Wallpaper for you"),
+        CustomBackground(id: "bg_6", name: "Wallpaper"),
+        CustomBackground(id: "bg_7", name: "_ (1)"),
+        CustomBackground(id: "bg_8", name: "_ (10)"),
+        CustomBackground(id: "bg_9", name: "_ (11)"),
+        CustomBackground(id: "bg_10", name: "_ (12)"),
+        CustomBackground(id: "bg_11", name: "_ (13)"),
+        CustomBackground(id: "bg_12", name: "_ (14)"),
+        CustomBackground(id: "bg_13", name: "_ (2)"),
+        CustomBackground(id: "bg_14", name: "_ (3)"),
+        CustomBackground(id: "bg_15", name: "_ (4)"),
+        CustomBackground(id: "bg_16", name: "_ (5)"),
+        CustomBackground(id: "bg_17", name: "_ (6)"),
+        CustomBackground(id: "bg_18", name: "_ (7)"),
+        CustomBackground(id: "bg_19", name: "_ (8)"),
+        CustomBackground(id: "bg_20", name: "_ (9)"),
+        CustomBackground(id: "bg_21", name: "_"),
+        CustomBackground(id: "bg_22", name: "cool asf"),
+        CustomBackground(id: "bg_23", name: "fondo amarillo"),
+        CustomBackground(id: "bg_24", name: "fondo rosa"),
+        CustomBackground(id: "bg_25", name: "star wallpaper")
+    ]
+    
+    var customBackgroundId: String {
+        get { UserDefaults.standard.string(forKey: "customBackgroundId") ?? "none" }
+        set { UserDefaults.standard.set(newValue, forKey: "customBackgroundId"); updateCustomTheme() }
+    }
+    
     var selectedThemeId: String {
         get { UserDefaults.standard.string(forKey: "selectedThemeId") ?? "classicMono" }
         set { UserDefaults.standard.set(newValue, forKey: "selectedThemeId") }
@@ -515,7 +555,8 @@ class ThemeManager: ObservableObject {
                 bezelColor: customBezelColor,
                 wheelColor: customWheelColor,
                 centerButtonColor: customCenterButtonColor,
-                fontName: customFontName
+                fontName: customFontName,
+                backgroundImage: customBackgroundId == "none" ? nil : customBackgroundId
             )
         }
     }
@@ -709,6 +750,7 @@ struct CoverFlowView: View {
             .foregroundColor(themeManager.currentTheme.textColor)
             .padding(.bottom, 16)
         }
+        .background(ThemeBackgroundView(isCoverFlow: true))
         .background(themeManager.currentTheme.backgroundColor)
         .clipped()
     }

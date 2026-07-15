@@ -1,6 +1,26 @@
 import SwiftUI
 import Combine
 
+// MARK: - Theme Background View
+struct ThemeBackgroundView: View {
+    @EnvironmentObject var themeManager: ThemeManager
+    var isCoverFlow: Bool = false
+    
+    var body: some View {
+        Group {
+            if themeManager.activeThemeId == "custom", let bg = themeManager.currentTheme.backgroundImage {
+                Image(bg)
+                    .resizable()
+                    .scaledToFill()
+                    .opacity(isCoverFlow ? 0.3 : 1.0)
+                    .clipped()
+            } else {
+                Color.clear
+            }
+        }
+    }
+}
+
 // MARK: - Sleep Timer Manager
 enum TimerStage {
     case hours
@@ -227,6 +247,7 @@ struct BrickGameView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
+            .background(ThemeBackgroundView())
             .onAppear {
                 engine.gameWidth = geo.size.width
                 engine.gameHeight = geo.size.height
@@ -267,9 +288,10 @@ struct SleepTimerView: View {
             
             Divider().background(themeManager.currentTheme.textColor)
             
-            Spacer()
-            
-            if sleepTimer.stage == .running {
+            VStack(spacing: 0) {
+                Spacer()
+                
+                if sleepTimer.stage == .running {
                 let h = sleepTimer.remainingSeconds / 3600
                 let m = (sleepTimer.remainingSeconds % 3600) / 60
                 let s = sleepTimer.remainingSeconds % 60
@@ -337,9 +359,10 @@ struct SleepTimerView: View {
                 Text(sleepTimer.stage == .hours ? "Set Hours" : (sleepTimer.stage == .minutes ? "Set Minutes" : "Set Seconds"))
                     .font(.custom(themeManager.currentTheme.fontName, size: 12))
                     .foregroundColor(themeManager.currentTheme.textColor)
+                Spacer()
             }
-            
-            Spacer()
+            }
+            .background(ThemeBackgroundView())
         }
     }
 }
@@ -372,6 +395,12 @@ struct SettingsThemesView: View {
                 
                 if themeManager.activeThemeId == "custom" {
                     VStack(spacing: 8) {
+                        Picker("Background Image", selection: $themeManager.customBackgroundId) {
+                            ForEach(themeManager.availableBackgrounds) { bg in
+                                Text(bg.name).tag(bg.id)
+                            }
+                        }
+                        
                         ColorPicker("Chassis", selection: $themeManager.customChassisColor)
                         ColorPicker("Background", selection: $themeManager.customBackgroundColor)
                         ColorPicker("Accent", selection: $themeManager.customAccentColor)
@@ -395,6 +424,7 @@ struct SettingsThemesView: View {
                 }
             }
         }
+        .background(ThemeBackgroundView())
     }
 }
 
@@ -422,6 +452,7 @@ struct SettingsMainView: View {
                 }
             }
         }
+        .background(ThemeBackgroundView())
     }
 }
 
