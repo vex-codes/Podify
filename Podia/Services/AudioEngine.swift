@@ -16,10 +16,12 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var duration: Double = 0.0
     @Published var isShuffleEnabled: Bool = false
     
-    private var player: AVAudioPlayer?
+    private var currentPlayer: AVAudioPlayer?
+    private var fadingPlayer: AVAudioPlayer?
     private var activeQueue: [Track] = []
     private var currentIndex: Int = 0
     private var timer: Timer?
+    private var isCrossfadingAutomatically = false
     
     override private init() {
         super.init()
@@ -50,15 +52,36 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
         guard let url = track.fileURL else { return }
         
         do {
-            player = try AVAudioPlayer(contentsOf: url)
-            player?.delegate = self
-            player?.isMeteringEnabled = true
-            player?.prepareToPlay()
-            player?.play()
+            let newPlayer = try AVAudioPlayer(contentsOf: url)
+            newPlayer.delegate = self
+            newPlayer.isMeteringEnabled = true
+            newPlayer.prepareToPlay()
             
+            if currentPlayer != nil && state == .playing {
+                fadingPlayer?.stop()
+                fadingPlayer = currentPlayer
+                
+                fadingPlayer?.setVolume(0.0, fadeDuration: 3.0)
+                let playerToStop = fadingPlayer
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    playerToStop?.stop()
+                }
+                
+                newPlayer.volume = 0.0
+                newPlayer.play()
+                newPlayer.setVolume(1.0, fadeDuration: 3.0)
+            } else {
+                currentPlayer?.stop()
+                fadingPlayer?.stop()
+                newPlayer.volume = 1.0
+                newPlayer.play()
+            }
+            
+            currentPlayer = newPlayer
             currentTrack = track
             state = .playing
-            duration = player?.duration ?? 0.0
+            duration = newPlayer.duration
+            isCrossfadingAutomatically = false
             
             startTimer()
             updateNowPlayingInfo()
@@ -70,11 +93,13 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     
     func togglePlayPause() {
         if state == .playing {
-            player?.pause()
+            currentPlayer?.pause()
+            fadingPlayer?.pause()
             state = .paused
             stopTimer()
         } else if state == .paused {
-            player?.play()
+            currentPlayer?.play()
+            fadingPlayer?.stop() // Abort crossfade on manual pause/resume
             state = .playing
             startTimer()
         }
@@ -82,7 +107,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     func fadeOutAndPause() {
-        guard let player = player else { return }
+        guard let player = currentPlayer else { return }
         player.setVolume(0.0, fadeDuration: 3.0)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
@@ -92,11 +117,12 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     func seek(by delta: TimeInterval) {
-        guard let player = player else { return }
+        guard let player = currentPlayer else { return }
         let newTime = player.currentTime + delta
         let clampedTime = max(0, min(newTime, duration))
         player.currentTime = clampedTime
         progress = clampedTime
+        fadingPlayer?.stop()
         updateNowPlayingInfo()
     }
     
@@ -109,7 +135,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     func previous() {
         guard !activeQueue.isEmpty else { return }
         if progress > 3.0 {
-            player?.currentTime = 0
+            currentPlayer?.currentTime = 0
             updateNowPlayingInfo()
         } else {
             currentIndex = (currentIndex - 1 + activeQueue.count) % activeQueue.count
@@ -127,8 +153,16 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private func startTimer() {
         stopTimer()
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            guard let self = self, let player = self.player else { return }
+            guard let self = self, let player = self.currentPlayer else { return }
             self.progress = player.currentTime
+            
+            let timeRemaining = player.duration - player.currentTime
+            let crossfadeDuration = 3.0
+            
+            if timeRemaining <= crossfadeDuration && player.duration > crossfadeDuration * 2 && !self.isCrossfadingAutomatically && self.state == .playing {
+                self.isCrossfadingAutomatically = true
+                self.next()
+            }
         }
     }
     
@@ -138,7 +172,9 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     }
     
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        next()
+        if player == currentPlayer {
+            next()
+        }
     }
     
     private func setupRemoteCommandCenter() {
@@ -169,7 +205,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     
 
     func getMeters() -> [CGFloat] {
-        guard state == .playing, let player = player else { return [2, 2, 2, 2, 2] }
+        guard state == .playing, let player = currentPlayer else { return [2, 2, 2, 2, 2] }
         player.updateMeters()
         
         let power = player.averagePower(forChannel: 0)
@@ -189,8 +225,8 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
         info[MPMediaItemPropertyTitle] = track.title
         info[MPMediaItemPropertyArtist] = track.artist
         info[MPMediaItemPropertyAlbumTitle] = track.album
-        info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player?.currentTime
-        info[MPMediaItemPropertyPlaybackDuration] = player?.duration
+        info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentPlayer?.currentTime
+        info[MPMediaItemPropertyPlaybackDuration] = currentPlayer?.duration
         
         if let url = track.fileURL {
             DispatchQueue.global(qos: .background).async {
