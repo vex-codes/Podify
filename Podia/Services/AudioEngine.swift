@@ -51,43 +51,51 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     private func startPlayback(for track: Track) {
         guard let url = track.fileURL else { return }
         
-        do {
-            let newPlayer = try AVAudioPlayer(contentsOf: url)
-            newPlayer.delegate = self
-            newPlayer.isMeteringEnabled = true
-            newPlayer.prepareToPlay()
-            
-            if currentPlayer != nil && state == .playing {
-                fadingPlayer?.stop()
-                fadingPlayer = currentPlayer
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            do {
+                let newPlayer = try AVAudioPlayer(contentsOf: url)
+                newPlayer.volume = 0.0 // FIX: Set volume before prepareToPlay to prevent audio blast
+                newPlayer.prepareToPlay()
                 
-                fadingPlayer?.setVolume(0.0, fadeDuration: 3.0)
-                let playerToStop = fadingPlayer
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                    playerToStop?.stop()
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    newPlayer.delegate = self
+                    newPlayer.isMeteringEnabled = true
+                    
+                    if self.currentPlayer != nil && self.state == .playing {
+                        self.fadingPlayer?.stop()
+                        self.fadingPlayer = self.currentPlayer
+                        
+                        self.fadingPlayer?.setVolume(0.0, fadeDuration: 3.0)
+                        let playerToStop = self.fadingPlayer
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                            playerToStop?.stop()
+                        }
+                        
+                        newPlayer.play()
+                        newPlayer.setVolume(1.0, fadeDuration: 3.0)
+                    } else {
+                        self.currentPlayer?.stop()
+                        self.fadingPlayer?.stop()
+                        newPlayer.volume = 1.0
+                        newPlayer.play()
+                    }
+                    
+                    self.currentPlayer = newPlayer
+                    self.currentTrack = track
+                    self.state = .playing
+                    self.duration = newPlayer.duration
+                    self.isCrossfadingAutomatically = false
+                    
+                    self.startTimer()
+                    self.updateNowPlayingInfo()
                 }
-                
-                newPlayer.volume = 0.0
-                newPlayer.play()
-                newPlayer.setVolume(1.0, fadeDuration: 3.0)
-            } else {
-                currentPlayer?.stop()
-                fadingPlayer?.stop()
-                newPlayer.volume = 1.0
-                newPlayer.play()
+            } catch {
+                DispatchQueue.main.async {
+                    print("Playback error: \(error)")
+                    self?.next()
+                }
             }
-            
-            currentPlayer = newPlayer
-            currentTrack = track
-            state = .playing
-            duration = newPlayer.duration
-            isCrossfadingAutomatically = false
-            
-            startTimer()
-            updateNowPlayingInfo()
-        } catch {
-            print("Playback error: \\(error)")
-            next()
         }
     }
     
