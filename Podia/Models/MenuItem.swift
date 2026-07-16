@@ -6,6 +6,7 @@ enum MenuItemType {
     case track(Track)
     case shuffleToggle
     case brokenFolder(SyncedFolder)
+    case header
     case back
 }
 

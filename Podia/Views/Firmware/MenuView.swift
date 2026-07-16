@@ -25,39 +25,58 @@ struct MenuView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
                         ForEach(Array(viewModel.currentMenu.enumerated()), id: \.element.id) { index, item in
-                            HStack {
-                                Text(item.title)
-                                    .font(.custom(themeManager.currentTheme.fontName, size: 16))
-                                    .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
-                                    .lineLimit(1)
-                                Spacer()
-                                Group {
-                                    switch item.type {
-                                    case .folder:
-                                        Image(systemName: "chevron.right")
-                                            .font(.system(size: 10, weight: .bold))
-                                    case .playlist:
-                                        Image(systemName: "music.note.list")
-                                            .font(.system(size: 10, weight: .bold))
-                                    case .track:
-                                        Image(systemName: "music.note")
-                                            .font(.system(size: 10, weight: .bold))
-                                    case .shuffleToggle:
-                                        Image(systemName: "shuffle")
-                                            .font(.system(size: 10, weight: .bold))
-                                    case .brokenFolder:
-                                        Image(systemName: "exclamationmark.triangle")
-                                            .font(.system(size: 10, weight: .bold))
-                                    case .back:
-                                        EmptyView()
+                            if case .header = item.type {
+                                VStack(spacing: 2) {
+                                    HStack {
+                                        Text(item.title.uppercased())
+                                            .font(.custom(themeManager.currentTheme.fontName, size: 11))
+                                            .bold()
+                                            .foregroundColor(themeManager.currentTheme.secondaryTextColor)
+                                            .tracking(1.0)
+                                        Spacer()
                                     }
+                                    .padding(.horizontal, 8)
+                                    Divider().background(themeManager.currentTheme.secondaryTextColor.opacity(0.3))
                                 }
-                                .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
+                                .padding(.top, 6)
+                                .padding(.bottom, 2)
+                                .background(Color.clear)
+                                .id(index)
+                            } else {
+                                HStack {
+                                    Text(item.title)
+                                        .font(.custom(themeManager.currentTheme.fontName, size: 16))
+                                        .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
+                                        .lineLimit(1)
+                                    Spacer()
+                                    Group {
+                                        switch item.type {
+                                        case .folder:
+                                            Image(systemName: "chevron.right")
+                                                .font(.system(size: 10, weight: .bold))
+                                        case .playlist:
+                                            Image(systemName: "music.note.list")
+                                                .font(.system(size: 10, weight: .bold))
+                                        case .track:
+                                            Image(systemName: "music.note")
+                                                .font(.system(size: 10, weight: .bold))
+                                        case .shuffleToggle:
+                                            Image(systemName: "shuffle")
+                                                .font(.system(size: 10, weight: .bold))
+                                        case .brokenFolder:
+                                            Image(systemName: "exclamationmark.triangle")
+                                                .font(.system(size: 10, weight: .bold))
+                                        case .back, .header:
+                                            EmptyView()
+                                        }
+                                    }
+                                    .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 6)
+                                .background(viewModel.scrollIndex == index ? themeManager.currentTheme.accentColor : Color.clear)
+                                .id(index)
                             }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 6)
-                            .background(viewModel.scrollIndex == index ? themeManager.currentTheme.accentColor : Color.clear)
-                            .id(index)
                         }
                     }
                 }

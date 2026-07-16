@@ -171,6 +171,10 @@ class PodViewModel: ObservableObject {
         
         var newMenu = [syncItem, npItem, settingsItem, shuffleItem]
         
+        if !LibraryManager.shared.syncedFolders.isEmpty {
+            newMenu.append(MenuItem(title: "Playlists", type: .header))
+        }
+        
         for folder in LibraryManager.shared.syncedFolders {
             if folder.isBroken {
                 newMenu.append(MenuItem(title: "! " + folder.displayName, type: .brokenFolder(folder)))
@@ -190,7 +194,14 @@ class PodViewModel: ObservableObject {
         if isNowPlayingPresented && isScrubbingMode {
             AudioEngine.shared.seek(by: Double(delta * 5)) // scrub 5 seconds per tick
         } else {
-            scrollIndex += delta
+            var proposedIndex = scrollIndex + delta
+            if !isSettingsPresented && !isCoverFlowPresented && proposedIndex >= 0 && proposedIndex < currentMenu.count {
+                while proposedIndex >= 0 && proposedIndex < currentMenu.count, 
+                      case .header = currentMenu[proposedIndex].type {
+                    proposedIndex += delta > 0 ? 1 : -1
+                }
+            }
+            scrollIndex = proposedIndex
         }
     }
     
@@ -222,6 +233,8 @@ class PodViewModel: ObservableObject {
         
         guard scrollIndex >= 0 && scrollIndex < currentMenu.count else { return }
         let selected = currentMenu[scrollIndex]
+        
+        if case .header = selected.type { return }
         
         if selected.title == "Sync Folder..." {
             relinkingFolderId = nil
