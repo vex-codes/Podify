@@ -26,20 +26,20 @@ struct MenuView: View {
                     VStack(spacing: 0) {
                         ForEach(Array(viewModel.currentMenu.enumerated()), id: \.element.id) { index, item in
                             if case .header = item.type {
-                                VStack(spacing: 2) {
+                                VStack(spacing: 4) {
                                     HStack {
                                         Text(item.title.uppercased())
-                                            .font(.custom(themeManager.currentTheme.fontName, size: 11))
+                                            .font(.custom(themeManager.currentTheme.fontName, size: 14))
                                             .bold()
-                                            .foregroundColor(themeManager.currentTheme.secondaryTextColor)
-                                            .tracking(1.0)
+                                            .foregroundColor(themeManager.currentTheme.textColor)
+                                            .tracking(2.0)
                                         Spacer()
                                     }
                                     .padding(.horizontal, 8)
-                                    Divider().background(themeManager.currentTheme.secondaryTextColor.opacity(0.3))
+                                    Divider().background(themeManager.currentTheme.textColor.opacity(0.6))
                                 }
-                                .padding(.top, 6)
-                                .padding(.bottom, 2)
+                                .padding(.top, 12)
+                                .padding(.bottom, 4)
                                 .background(Color.clear)
                                 .id(index)
                             } else {
