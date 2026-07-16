@@ -36,9 +36,11 @@ struct MenuView: View {
                                         Spacer()
                                     }
                                     .padding(.horizontal, 8)
-                                    Divider().background(themeManager.currentTheme.textColor.opacity(0.6))
+                                    Rectangle()
+                                        .fill(themeManager.currentTheme.textColor.opacity(0.8))
+                                        .frame(height: 2)
                                 }
-                                .padding(.top, 12)
+                                .padding(.top, 20)
                                 .padding(.bottom, 4)
                                 .background(Color.clear)
                                 .id(index)
