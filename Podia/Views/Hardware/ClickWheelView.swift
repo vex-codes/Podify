@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioToolbox
 
 struct ClickWheelView: View {
     @Binding var scrollIndex: Int
@@ -20,22 +21,22 @@ struct ClickWheelView: View {
                     VStack {
                         Text("MENU").font(.system(size: 14, weight: .bold)).foregroundColor(.gray)
                             .padding(.top, 15)
-                            .onTapGesture { onMenuTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
+                            .onTapGesture { onMenuTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred(); AudioServicesPlaySystemSound(1104) }
                         Spacer()
                         Text("▶︎||").font(.system(size: 14, weight: .bold)).foregroundColor(.gray)
                             .padding(.bottom, 15)
-                            .onTapGesture { onPlayPauseTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
+                            .onTapGesture { onPlayPauseTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred(); AudioServicesPlaySystemSound(1104) }
                     }
                 )
                 .overlay(
                     HStack {
                         Text("|◀︎").font(.system(size: 14, weight: .bold)).foregroundColor(.gray)
                             .padding(.leading, 15)
-                            .onTapGesture { onPrevTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
+                            .onTapGesture { onPrevTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred(); AudioServicesPlaySystemSound(1104) }
                         Spacer()
                         Text("▶︎|").font(.system(size: 14, weight: .bold)).foregroundColor(.gray)
                             .padding(.trailing, 15)
-                            .onTapGesture { onNextTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
+                            .onTapGesture { onNextTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred(); AudioServicesPlaySystemSound(1104) }
                     }
                 )
                 .overlay(
@@ -45,6 +46,7 @@ struct ClickWheelView: View {
                         .onTapGesture {
                             onCenterTap()
                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                            AudioServicesPlaySystemSound(1104)
                         }
                 )
                 .gesture(
@@ -62,6 +64,7 @@ struct ClickWheelView: View {
                                     scrollIndex += delta
                                 }
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                AudioServicesPlaySystemSound(1104)
                                 lastAngle = currentAngle
                             }
                         }
