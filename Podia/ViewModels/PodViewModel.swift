@@ -40,7 +40,7 @@ class PodViewModel: ObservableObject {
         }
     }
     
-    @Published var navigationPath: [String] = ["Podify"]
+    @Published var navigationPath: [String] = ["Podia"]
     @Published var currentMenu: [MenuItem] = []
     
     @Published var isShowingDocumentPicker = false

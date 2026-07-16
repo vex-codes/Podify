@@ -1,6 +1,6 @@
 //
-//  PodifyApp.swift
-//  Podify
+//  PodiaApp.swift
+//  Podia
 //
 //  Created by Vedansh Kumar on 7/14/26.
 //
@@ -14,7 +14,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 }
 
 @main
-struct PodifyApp: App {
+struct PodiaApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var themeManager = ThemeManager()
     @StateObject private var securityManager = SecurityManager.shared

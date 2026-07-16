@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		E1D9981A30057CE6006C90E6 /* Podify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Podify.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1D9981A30057CE6006C90E6 /* Podia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Podia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		E1D9981C30057CE6006C90E6 /* Podify */ = {
+		E1D9981C30057CE6006C90E6 /* Podia */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Podify;
+			path = Podia;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -32,7 +32,7 @@
 		E1D9981130057CE6006C90E6 = {
 			isa = PBXGroup;
 			children = (
-				E1D9981C30057CE6006C90E6 /* Podify */,
+				E1D9981C30057CE6006C90E6 /* Podia */,
 				E1D9981B30057CE6006C90E6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -40,7 +40,7 @@
 		E1D9981B30057CE6006C90E6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E1D9981A30057CE6006C90E6 /* Podify.app */,
+				E1D9981A30057CE6006C90E6 /* Podia.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +48,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E1D9981930057CE6006C90E6 /* Podify */ = {
+		E1D9981930057CE6006C90E6 /* Podia */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E1D9982530057CE8006C90E6 /* Build configuration list for PBXNativeTarget "Podify" */;
+			buildConfigurationList = E1D9982530057CE8006C90E6 /* Build configuration list for PBXNativeTarget "Podia" */;
 			buildPhases = (
 				E1D9981630057CE6006C90E6 /* Sources */,
 				E1D9981730057CE6006C90E6 /* Frameworks */,
@@ -62,11 +62,11 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				E1D9981C30057CE6006C90E6 /* Podify */,
+				E1D9981C30057CE6006C90E6 /* Podia */,
 			);
-			name = Podify;
-			productName = Podify;
-			productReference = E1D9981A30057CE6006C90E6 /* Podify.app */;
+			name = Podia;
+			productName = Podia;
+			productReference = E1D9981A30057CE6006C90E6 /* Podia.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -98,7 +98,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E1D9981930057CE6006C90E6 /* Podify */,
+				E1D9981930057CE6006C90E6 /* Podia */,
 			);
 		};
 /* End PBXProject section */
@@ -276,7 +276,7 @@
 				DEVELOPMENT_TEAM = 9JBAM658FB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Podify/PodifyInfo.plist;
+				INFOPLIST_FILE = Podia/PodiaInfo.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIBackgroundModes = audio;
@@ -288,7 +288,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "vex-codes.Podify";
+				PRODUCT_BUNDLE_IDENTIFIER = "vex-codes.Podia";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -310,7 +310,7 @@
 				DEVELOPMENT_TEAM = 9JBAM658FB;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Podify/PodifyInfo.plist;
+				INFOPLIST_FILE = Podia/PodiaInfo.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIBackgroundModes = audio;
@@ -322,7 +322,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "vex-codes.Podify";
+				PRODUCT_BUNDLE_IDENTIFIER = "vex-codes.Podia";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -346,7 +346,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E1D9982530057CE8006C90E6 /* Build configuration list for PBXNativeTarget "Podify" */ = {
+		E1D9982530057CE8006C90E6 /* Build configuration list for PBXNativeTarget "Podia" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E1D9982630057CE8006C90E6 /* Debug */,
