@@ -84,7 +84,7 @@
 					};
 				};
 			};
-			buildConfigurationList = E1D9981530057CE6006C90E6 /* Build configuration list for PBXProject "Podify" */;
+			buildConfigurationList = E1D9981530057CE6006C90E6 /* Build configuration list for PBXProject "Podia" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -337,7 +337,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		E1D9981530057CE6006C90E6 /* Build configuration list for PBXProject "Podify" */ = {
+		E1D9981530057CE6006C90E6 /* Build configuration list for PBXProject "Podia" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E1D9982330057CE8006C90E6 /* Debug */,
