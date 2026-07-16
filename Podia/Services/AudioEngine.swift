@@ -63,7 +63,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
                     newPlayer.delegate = self
                     newPlayer.isMeteringEnabled = true
                     
-                    if self.currentPlayer != nil && self.state == .playing {
+                    if self.currentPlayer != nil && self.state == .playing && self.isCrossfadeEnabled {
                         self.fadingPlayer?.stop()
                         self.fadingPlayer = self.currentPlayer
                         
