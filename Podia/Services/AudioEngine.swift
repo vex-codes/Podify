@@ -15,6 +15,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
     @Published var progress: Double = 0.0
     @Published var duration: Double = 0.0
     @Published var isShuffleEnabled: Bool = false
+    @Published var isCrossfadeEnabled: Bool = false
     
     private var currentPlayer: AVAudioPlayer?
     private var fadingPlayer: AVAudioPlayer?
@@ -167,7 +168,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
             let timeRemaining = player.duration - player.currentTime
             let crossfadeDuration = 8.0
             
-            if timeRemaining <= crossfadeDuration && player.duration > crossfadeDuration * 2 && !self.isCrossfadingAutomatically && self.state == .playing {
+            if self.isCrossfadeEnabled && timeRemaining <= crossfadeDuration && player.duration > crossfadeDuration * 2 && !self.isCrossfadingAutomatically && self.state == .playing {
                 self.isCrossfadingAutomatically = true
                 self.next()
             }

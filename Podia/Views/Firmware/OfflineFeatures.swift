@@ -452,7 +452,10 @@ struct SettingsThemesView: View {
 struct SettingsMainView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @ObservedObject var viewModel: PodViewModel
-    let options = ["Themes", "Sleep Timer", "Brick Game"]
+    
+    var options: [String] {
+        ["Themes", "Sleep Timer", "Crossfade: \(viewModel.isCrossfadeEnabled ? "On" : "Off")", "Brick Game"]
+    }
     
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -462,8 +465,10 @@ struct SettingsMainView: View {
                         Text(options[index])
                             .font(.custom(themeManager.currentTheme.fontName, size: 16))
                         Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .bold))
+                        if index != 2 {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .bold))
+                        }
                     }
                     .foregroundColor(viewModel.scrollIndex == index ? themeManager.currentTheme.backgroundColor : themeManager.currentTheme.textColor)
                     .padding(.horizontal, 8)

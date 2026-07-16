@@ -16,7 +16,7 @@ class PodViewModel: ObservableObject {
                 maxCount = playlist.tracks.count
             } else if isSettingsPresented {
                 switch settingsState {
-                case .main: maxCount = 3
+                case .main: maxCount = 4
                 case .themes: maxCount = ThemeFactory.presets.count + 1
                 case .sleepTimer: 
                     switch SleepTimerManager.shared.stage {
@@ -109,6 +109,13 @@ class PodViewModel: ObservableObject {
         }
     }
     
+    @Published var isCrossfadeEnabled: Bool = UserDefaults.standard.bool(forKey: "savedCrossfadeState") {
+        didSet {
+            UserDefaults.standard.set(isCrossfadeEnabled, forKey: "savedCrossfadeState")
+            AudioEngine.shared.isCrossfadeEnabled = isCrossfadeEnabled
+        }
+    }
+    
     private func updatePlaybackQueue() {
         guard let playlist = selectedPlaylist else {
             return
@@ -122,6 +129,7 @@ class PodViewModel: ObservableObject {
     
     init() {
         AudioEngine.shared.isShuffleEnabled = self.isShuffleEnabled
+        AudioEngine.shared.isCrossfadeEnabled = self.isCrossfadeEnabled
         
         LibraryManager.shared.$syncedFolders
             .sink { [weak self] _ in
@@ -208,10 +216,17 @@ class PodViewModel: ObservableObject {
     func selectCurrentItem() {
         if isSettingsPresented {
             if settingsState == .main {
-                let options: [SettingsState] = [.themes, .sleepTimer, .brickGame]
-                if scrollIndex >= 0 && scrollIndex < options.count {
-                    settingsState = options[scrollIndex]
-                    scrollIndex = (settingsState == .brickGame) ? 5000 : 0
+                if scrollIndex == 0 {
+                    settingsState = .themes
+                    scrollIndex = 0
+                } else if scrollIndex == 1 {
+                    settingsState = .sleepTimer
+                    scrollIndex = 0
+                } else if scrollIndex == 2 {
+                    isCrossfadeEnabled.toggle()
+                } else if scrollIndex == 3 {
+                    settingsState = .brickGame
+                    scrollIndex = 5000
                 }
             }
             return
