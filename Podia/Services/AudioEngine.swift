@@ -66,14 +66,14 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
                         self.fadingPlayer?.stop()
                         self.fadingPlayer = self.currentPlayer
                         
-                        self.fadingPlayer?.setVolume(0.0, fadeDuration: 3.0)
+                        self.fadingPlayer?.setVolume(0.0, fadeDuration: 8.0)
                         let playerToStop = self.fadingPlayer
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 8.0) {
                             playerToStop?.stop()
                         }
                         
                         newPlayer.play()
-                        newPlayer.setVolume(1.0, fadeDuration: 3.0)
+                        newPlayer.setVolume(1.0, fadeDuration: 8.0)
                     } else {
                         self.currentPlayer?.stop()
                         self.fadingPlayer?.stop()
@@ -165,7 +165,7 @@ class AudioEngine: NSObject, ObservableObject, AVAudioPlayerDelegate {
             self.progress = player.currentTime
             
             let timeRemaining = player.duration - player.currentTime
-            let crossfadeDuration = 3.0
+            let crossfadeDuration = 8.0
             
             if timeRemaining <= crossfadeDuration && player.duration > crossfadeDuration * 2 && !self.isCrossfadingAutomatically && self.state == .playing {
                 self.isCrossfadingAutomatically = true
