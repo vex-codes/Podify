@@ -17,6 +17,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct PodifyApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var themeManager = ThemeManager()
+    @StateObject private var securityManager = SecurityManager.shared
     @Environment(\.scenePhase) private var scenePhase
     
     init() {
@@ -24,8 +25,26 @@ struct PodifyApp: App {
     
     var body: some Scene {
         WindowGroup {
-            IPodChassisView()
-                .environmentObject(themeManager)
+            if securityManager.isCompromised {
+                ZStack {
+                    Color.black.edgesIgnoringSafeArea(.all)
+                    VStack(spacing: 20) {
+                        Image(systemName: "lock.shield.fill")
+                            .font(.system(size: 80))
+                            .foregroundColor(.red)
+                        Text("Security Alert")
+                            .font(.title).bold()
+                            .foregroundColor(.white)
+                        Text("This app cannot run on a compromised or jailbroken device. Device tampering detected.")
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.gray)
+                            .padding(.horizontal, 40)
+                    }
+                }
+            } else {
+                IPodChassisView()
+                    .environmentObject(themeManager)
+            }
         }
     }
 }

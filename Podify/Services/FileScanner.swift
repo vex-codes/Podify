@@ -23,7 +23,7 @@ class ImageCache {
         let fileURL = cacheDirectory.appendingPathComponent("\(key).jpg")
         if !fileManager.fileExists(atPath: fileURL.path) {
             if let data = image.jpegData(compressionQuality: 0.8) {
-                try? data.write(to: fileURL)
+                try? data.write(to: fileURL, options: .completeFileProtection)
             }
         }
     }
