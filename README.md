@@ -42,7 +42,7 @@ Podify/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/Podify.git
+   git clone https://github.com/vex-codes/Podify.git
    cd Podify
    ```
 
