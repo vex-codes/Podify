@@ -1,20 +1,62 @@
 # Podify (Podia)
 
-Retro iPod Classic simulator & Apple Music downloader engine built for iOS (SwiftUI) and Python.
+An authentic iPod Classic simulator & local music player built with SwiftUI for iOS.
 
-## Overview
+## Highlights
 
-- **Podia iOS App**: Retro iPod chassis interface with interactive Click Wheel, custom firmware themes, hardware haptics, and security checks.
-- **Apple Music Downloader / Scraper**: Python & CustomTkinter Y2K cyber-deck desktop engine for scraping Apple Music playlists, YouTube audio stream matching (yt-dlp), EBU R128 volume normalization (FFmpeg), and ID3 metadata tagging (Mutagen).
+- 🎛️ **Authentic Click Wheel Navigation**: Rotational gesture tracking with haptic feedback, center select button, and physical controls (Menu, Play/Pause, Forward, Rewind).
+- 📺 **Retro iPod Firmware UI**: Split-screen classic menus, authentic pixel typography (Silkscreen & VT323), and nostalgic monochrome or color LCD styling.
+- 💿 **3D Cover Flow**: Interactive Cover Flow album browser with dynamic perspective transforms.
+- 🎨 **Custom Themes & Wallpapers**: 25 curated retro wallpapers, custom chassis colorways, wheel colors, and LCD backlight themes.
+- 🎵 **Local Audio Playback**: Import local music folders (`.mp3`, `.m4a`, `.wav`, `.flac`) via iOS Document Picker with automatic ID3 tag & embedded album artwork extraction.
+- 🔊 **Full Audio Engine**: Background playback (`UIBackgroundModes: audio`), Lock Screen / Control Center Now Playing integration (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`), audio crossfade, and real-time visualizer.
+- 🕹️ **Extras**: Built-in retro Brick game and configurable Sleep Timer.
+- 🛡️ **Device Integrity**: Sandbox & jailbreak verification via `SecurityManager`.
 
-## Features
+## Tech Stack
 
-- **iPod UI**: Authentic retro Click Wheel navigation, LCD display, and customizable themes.
-- **Playlist Sync**: Download and update local audio files from Apple Music playlists skip-syncing duplicates.
-- **Audio Processing**: High-bitrate MP3 transcoding, cover art tagging, and loudness leveling.
+- **Framework**: SwiftUI + Combine
+- **Audio & Media**: AVFoundation (`AVAudioPlayer`, `AVQueuePlayer`), MediaPlayer (`MPNowPlayingInfoCenter`, `MPRemoteCommandCenter`)
+- **Compatibility**: iOS 17.0+ / iOS 18.0+
+- **IDE**: Xcode 16+
 
-## Architecture
+## Project Structure
 
-- **`Podia/`**: SwiftUI iOS App (Click Wheel, Firmware UI, Audio Player).
-- **`SCRAPER.MD`**: Technical walkthrough & pipeline docs for Python downloader.
-- **`add_bg_script.rb` / `sync_xcode.rb`**: Ruby build & asset automation helpers.
+```
+Podify/
+├── Podia/
+│   ├── Models/             # Track, MenuItem, Playlist, LibraryManager
+│   ├── Services/           # AudioEngine, FileScanner, SecurityManager
+│   ├── ViewModels/         # PodViewModel (state machine & navigation)
+│   ├── Views/
+│   │   ├── Hardware/       # IPodChassisView, ClickWheelView, DocumentPicker
+│   │   └── Firmware/       # MenuView, NowPlayingView, ScreenContainer, OfflineFeatures
+│   ├── Assets.xcassets/    # App icons, wallpapers, color palettes
+│   ├── Fonts/              # Silkscreen & VT323 retro fonts
+│   └── PodiaInfo.plist     # Background audio configuration & font registration
+├── Podia.xcodeproj/        # Xcode project configuration
+└── README.md
+```
+
+## Getting Started
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/Podify.git
+   cd Podify
+   ```
+
+2. **Open in Xcode:**
+   ```bash
+   open Podia.xcodeproj
+   ```
+
+3. **Run:**
+   Select an iOS Simulator or connected physical iOS device and press **Cmd + R** to build and run.
+
+4. **Import Music:**
+   Use the in-app document picker on device or drag music files into the app container to scan and populate your retro library.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
