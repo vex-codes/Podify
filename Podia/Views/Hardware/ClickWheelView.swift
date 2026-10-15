@@ -20,22 +20,22 @@ struct ClickWheelView: View {
                     VStack {
                         Text("MENU").font(.system(size: 14, weight: .bold)).foregroundColor(.gray)
                             .padding(.top, 15)
-                            .onTapGesture { onMenuTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred(); ClickSoundManager.shared.playClick() }
+                            .onTapGesture { onMenuTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
                         Spacer()
                         Text("▶︎||").font(.system(size: 14, weight: .bold)).foregroundColor(.gray)
                             .padding(.bottom, 15)
-                            .onTapGesture { onPlayPauseTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred(); ClickSoundManager.shared.playClick() }
+                            .onTapGesture { onPlayPauseTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
                     }
                 )
                 .overlay(
                     HStack {
                         Text("|◀︎").font(.system(size: 14, weight: .bold)).foregroundColor(.gray)
                             .padding(.leading, 15)
-                            .onTapGesture { onPrevTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred(); ClickSoundManager.shared.playClick() }
+                            .onTapGesture { onPrevTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
                         Spacer()
                         Text("▶︎|").font(.system(size: 14, weight: .bold)).foregroundColor(.gray)
                             .padding(.trailing, 15)
-                            .onTapGesture { onNextTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred(); ClickSoundManager.shared.playClick() }
+                            .onTapGesture { onNextTap(); UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
                     }
                 )
                 .overlay(
@@ -45,7 +45,6 @@ struct ClickWheelView: View {
                         .onTapGesture {
                             onCenterTap()
                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                            ClickSoundManager.shared.playClick()
                         }
                 )
                 .gesture(
@@ -63,7 +62,6 @@ struct ClickWheelView: View {
                                     scrollIndex += delta
                                 }
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                ClickSoundManager.shared.playClick()
                                 lastAngle = currentAngle
                             }
                         }
